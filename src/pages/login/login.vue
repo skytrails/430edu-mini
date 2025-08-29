@@ -15,8 +15,8 @@
   <PageLayout :navbarShow="false">
     <view class="page-container">
       <view class="text-center">
-        <image :src="compLogo" mode="aspectFit" class="logo"></image>
-        <view class="title text-shadow">{{ compTitle || 'JEECG BOOT' }}</view>
+        <image src="/static/app/icons/logo.png" mode="aspectFit" class="logo"></image>
+        <!--view class="title text-shadow">{{ compTitle || 'JEECG BOOT' }}</view-->
         <view class="enter-area">
           <view v-if="loginWay == 1" class="account-login-area">
             <view class="box account">
@@ -133,13 +133,13 @@ paramsStore.reset()
 // 是否开启本地路由配置
 let isLocalConfig = getApp().globalData.isLocalConfig;
 if (import.meta.env.MODE === 'development') {
-  userName.value = 'admin'
-  password.value = '123456'
+  userName.value = '15119337951'
+  password.value = 'X3a5Z8LmDP'
 }
 
 if (import.meta.env.MODE === 'production') {
-  userName.value = 'jeecg'
-  password.value = 'jeecg#123456'
+  userName.value = '15119337951'
+  password.value = 'X3a5Z8LmDP'
 }
 
 const isSendSMSEnable = computed(() => {
@@ -207,7 +207,7 @@ const accountLogin = () => {
   }
   loading.value = true
   http
-    .post('/sys/mLogin', { username: userName.value, password: password.value })
+    .post('/v1/token', { username: userName.value, password: password.value, grant_type: "password" })
     .then((res: any) => {
       if (res.success) {
         const { result } = res
@@ -324,7 +324,7 @@ const loadConfig = () => {
       let info = res.result
       if (info) {
         compLogo.value = getFileAccessHttpUrl(info.appLogo) || defLogo
-        compTitle.value = info.appTitle || 'JEECG-BOOT'
+        compTitle.value = info.appTitle || '智趣猴'
       } else {
         compLogo.value = defLogo
       }
@@ -365,8 +365,8 @@ if (isLocalConfig === false) {
   font-size: 15px;
   color: var(--UI-FG-0);
   .logo {
-    width: 200upx;
-    height: 150px;
+    width: 400upx;
+    height: 300px;
   }
   .title {
     font-size: 58upx;
