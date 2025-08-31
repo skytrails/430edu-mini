@@ -15,7 +15,7 @@
   },
   "tabBar": {
     "color": "#aaa",
-    "selectedColor": "#39b54a",
+    "selectedColor": "#d81e06",
     "backgroundColor": "#F8F8F8",
     "borderStyle": "black",
     "height": "50px",
@@ -24,20 +24,26 @@
     "spacing": "3px",
     "list": [
       {
+        "iconPath": "static/tabbar/tabbar-01.png",
+        "selectedIconPath": "static/tabbar/tabbar-02.png",
+        "pagePath": "pages/shift/shift",
+        "text": "排班"
+      },
+      {
         "iconPath": "static/tabbar/tabbar-message-2.png",
         "selectedIconPath": "static/tabbar/tabbar-message.png",
         "pagePath": "pages/message/message",
         "text": "消息"
       },
       {
-        "iconPath": "static/tabbar/tabbar-home-2.png",
-        "selectedIconPath": "static/tabbar/tabbar-home.png",
+        "iconPath": "static/tabbar/tabbar-contact-01.png",
+        "selectedIconPath": "static/tabbar/tabbar-contact-02.png",
         "pagePath": "pages/index/index",
-        "text": "协作"
+        "text": "通讯录"
       },
       {
-        "iconPath": "static/tabbar/tabbar-user-2.png",
-        "selectedIconPath": "static/tabbar/tabbar-user.png",
+        "iconPath": "static/tabbar/tabbar-user-01.png",
+        "selectedIconPath": "static/tabbar/tabbar-user-02.png",
         "pagePath": "pages/user/people",
         "text": "个人"
       }
@@ -83,6 +89,19 @@
       "layout": "default",
       "style": {
         "navigationBarTitleText": "我的消息",
+        "navigationStyle": "custom",
+        "disableScroll": true,
+        "app-plus": {
+          "bounce": "none"
+        }
+      }
+    },
+    {
+      "path": "pages/shift/shift",
+      "type": "page",
+      "layout": "default",
+      "style": {
+        "navigationBarTitleText": "排班",
         "navigationStyle": "custom",
         "disableScroll": true,
         "app-plus": {

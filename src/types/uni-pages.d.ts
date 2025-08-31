@@ -17,6 +17,7 @@ interface NavigateToOptions {
        "/pages/login/loginOauth2" |
        "/pages/message/message" |
        "/pages/more/more" |
+       "/pages/shift/shift" |
        "/pages/user/people" |
        "/pages/workHome/workHome" |
        "/pages-home/home/home" |
