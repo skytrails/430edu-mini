@@ -55,8 +55,8 @@
       "type": "home",
       "layout": "default",
       "style": {
+        "navigationBarTitleText": "",
         "navigationStyle": "custom",
-        "navigationBarTitleText": "首页",
         "disableScroll": true,
         "app-plus": {
           "bounce": "none"
@@ -89,19 +89,6 @@
       "layout": "default",
       "style": {
         "navigationBarTitleText": "我的消息",
-        "navigationStyle": "custom",
-        "disableScroll": true,
-        "app-plus": {
-          "bounce": "none"
-        }
-      }
-    },
-    {
-      "path": "pages/shift/shift",
-      "type": "page",
-      "layout": "default",
-      "style": {
-        "navigationBarTitleText": "排班",
         "navigationStyle": "custom",
         "disableScroll": true,
         "app-plus": {
@@ -209,6 +196,19 @@
       "layout": "default",
       "style": {
         "navigationBarTitleText": "更多",
+        "navigationStyle": "custom",
+        "disableScroll": true,
+        "app-plus": {
+          "bounce": "none"
+        }
+      }
+    },
+    {
+      "path": "pages/shift/shift",
+      "type": "page",
+      "layout": "default",
+      "style": {
+        "navigationBarTitleText": "demo演示",
         "navigationStyle": "custom",
         "disableScroll": true,
         "app-plus": {
