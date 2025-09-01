@@ -14,7 +14,6 @@ interface NavigateToOptions {
        "/pages/demo/selectPicker" |
        "/pages/demo/tree" |
        "/pages/login/login" |
-       "/pages/login/loginOauth2" |
        "/pages/message/message" |
        "/pages/more/more" |
        "/pages/shift/shift" |
@@ -27,7 +26,6 @@ interface NavigateToOptions {
        "/pages-message/myGroup/groupPage" |
        "/pages-message/myGroup/myGroup" |
        "/pages-message/personPage/personPage" |
-       "/pages-message/tenant/tenant" |
        "/pages-user/location/location" |
        "/pages-user/organization/organization" |
        "/pages-user/userDetail/userDetail" |

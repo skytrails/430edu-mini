@@ -325,7 +325,7 @@ const phoneLogin = () => {
 };
 //部門配置
 const departConfig = () => {
-  const appQueryUser = () => {
+  /*const appQueryUser = () => {
     http
       .get("/sys/user/appQueryUser", {
         username: userStore.userInfo.username,
@@ -337,7 +337,7 @@ const departConfig = () => {
         }
       });
   };
-  appQueryUser();
+  appQueryUser();*/
 };
 const appConfig = () => {
   if (isLocalConfig) {

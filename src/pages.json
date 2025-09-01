@@ -174,10 +174,6 @@
       }
     },
     {
-      "path": "pages/login/loginOauth2",
-      "type": "page"
-    },
-    {
       "path": "pages/message/message",
       "type": "page",
       "layout": "default",
@@ -331,19 +327,6 @@
         },
         {
           "path": "personPage/personPage",
-          "type": "page",
-          "layout": "default",
-          "style": {
-            "navigationBarTitleText": "",
-            "navigationStyle": "custom",
-            "disableScroll": true,
-            "app-plus": {
-              "bounce": "none"
-            }
-          }
-        },
-        {
-          "path": "tenant/tenant",
           "type": "page",
           "layout": "default",
           "style": {
