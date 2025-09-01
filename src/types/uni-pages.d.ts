@@ -21,8 +21,6 @@ interface NavigateToOptions {
        "/pages/user/people" |
        "/pages/workHome/workHome" |
        "/pages-home/home/home" |
-       "/pages-message/chat/chat" |
-       "/pages-message/chat/chatSetting" |
        "/pages-message/contacts/contacts" |
        "/pages-message/moreFunction/moreFunction" |
        "/pages-message/myGroup/addGroup" |

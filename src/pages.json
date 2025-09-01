@@ -265,32 +265,6 @@
       "root": "pages-message",
       "pages": [
         {
-          "path": "chat/chat",
-          "type": "page",
-          "layout": "default",
-          "style": {
-            "navigationBarTitleText": "聊天",
-            "navigationStyle": "custom",
-            "disableScroll": true,
-            "app-plus": {
-              "bounce": "none"
-            }
-          }
-        },
-        {
-          "path": "chat/chatSetting",
-          "type": "page",
-          "layout": "default",
-          "style": {
-            "navigationBarTitleText": "",
-            "navigationStyle": "custom",
-            "disableScroll": true,
-            "app-plus": {
-              "bounce": "none"
-            }
-          }
-        },
-        {
           "path": "contacts/contacts",
           "type": "page",
           "layout": "default",
