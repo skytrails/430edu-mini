@@ -86,7 +86,7 @@
 import { compList, COMP_NAME_PREFIX } from '../components/common/concants'
 import { http } from '@/utils/http'
 // #ifdef MP-WEIXIN
-import dynamicComponent from '../components/echarts/dynamic-component.vue'
+// import dynamicComponent from '../components/echarts/dynamic-component.vue'
 // #endif
 import { useLinkage } from '../components/hooks/useLinkage'
 import { cache } from '@/common/uitls'
