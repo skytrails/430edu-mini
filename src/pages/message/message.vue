@@ -1,12 +1,12 @@
 <route lang="json5" type="page">
 {
-  layout: 'default',
+  layout: "default",
   style: {
-    navigationBarTitleText: '',
-    navigationStyle: 'custom',
+    navigationBarTitleText: "",
+    navigationStyle: "custom",
     disableScroll: true, // 微信禁止页面滚动
-    'app-plus': {
-      bounce: 'none', // 禁用 iOS 弹性效果
+    "app-plus": {
+      bounce: "none", // 禁用 iOS 弹性效果
     },
   },
 }
@@ -14,14 +14,30 @@
 
 <template>
   <PageLayout :navbarShow="false">
-    <view
-      class="wrap"
-      :style="{
-        '--nav-height': `${statusBarHeight + navHeight}px`,
-        '--status-bar-height': `${statusBarHeight}px`,
-      }"
-    >
-      <wd-tabs :customClass="getClass()" v-model="tabActive">
+    <view class="wrap">
+      <view class="container">
+        <view style="font-size: 32px">消息</view>
+        <view style="display: flex; gap: 10px;">
+          <wd-img
+            width="20"
+            height="24"
+            :round="true"
+            :radius="50"
+            src="/static/talk.png"
+            @click="ChooseImage"
+          ></wd-img>
+          <wd-img
+            width="20"
+            height="20"
+            :round="true"
+            :radius="50"
+            src="/static/plus.png"
+            @click="ChooseImage"
+          ></wd-img>
+        </view>
+      </view>
+      <wd-search placeholder-left hide-cancel/>
+      <!--wd-tabs :customClass="getClass()" v-model="tabActive">
         <template v-for="(item, index) in tabList" :key="index">
           <wd-tab :title="item.title" :name="item.key">
             <view class="mainContent">
@@ -30,53 +46,62 @@
             </view>
           </wd-tab>
         </template>
-      </wd-tabs>
+      </wd-tabs-->
+    <wd-status-tip image="content" tip="暂无消息" />
     </view>
   </PageLayout>
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
-import chatList from './components/chatList.vue'
-import addressBookList from './components/addressBookList.vue'
-import { platform, isMp } from '@/utils/platform'
-import { useRouter } from '@/plugin/uni-mini-router'
-import { useParamsStore } from '@/store/page-params'
+import { ref } from "vue";
+import chatList from "./components/chatList.vue";
+import addressBookList from "./components/addressBookList.vue";
+import { platform, isMp } from "@/utils/platform";
+import { useRouter } from "@/plugin/uni-mini-router";
+import { useParamsStore } from "@/store/page-params";
 
 defineOptions({
-  name: 'message',
+  name: "message",
   options: {
     // apply-shared‌：当前页面样式会影响到子组件样式.(小程序)
     // shared‌：当前页面样式影响到子组件，子组件样式也会影响到当前页面.(小程序)
-    styleIsolation: '‌shared‌',
+    styleIsolation: "‌shared‌",
   },
-})
+});
 
-const paramsStore = useParamsStore()
-const router = useRouter()
-const globalData = getApp().globalData
-const { systemInfo, navHeight } = globalData
-const { statusBarHeight } = systemInfo
-console.log('systemInfo:::', systemInfo)
+const paramsStore = useParamsStore();
+const router = useRouter();
+const globalData = getApp().globalData;
+const { systemInfo, navHeight } = globalData;
+const { statusBarHeight } = systemInfo;
+console.log("systemInfo:::", systemInfo);
 const tabList = ref([
-  { key: '1', title: '消息' },
-  { key: '2', title: '通讯录' },
-])
-const tabActive = ref<string>('1')
+  { key: "1", title: "消息" },
+  { key: "2", title: "通讯录" },
+]);
+const tabActive = ref<string>("1");
 const getClass = () => {
-  return `${platform} ${isMp ? 'mp' : ''}`
-}
+  return `${platform} ${isMp ? "mp" : ""}`;
+};
 const handleGo = () => {
-  paramsStore.setPageParams('flowIndex', {
-    backRouteName: 'message',
-  })
-  router.push({ name: 'flowIndex' })
-}
+  paramsStore.setPageParams("flowIndex", {
+    backRouteName: "message",
+  });
+  router.push({ name: "flowIndex" });
+};
 </script>
 
 <style lang="scss" scoped>
 .wrap {
   height: 100%;
+}
+.container {
+  height: 80px;
+  background-color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
 }
 :deep(.wd-tabs) {
   display: flex;

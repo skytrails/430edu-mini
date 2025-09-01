@@ -1,12 +1,12 @@
 <route lang="json5" type="page">
 {
-  layout: 'default',
+  layout: "default",
   style: {
-    navigationStyle: 'custom',
-    navigationBarTitleText: '个人',
+    navigationStyle: "custom",
+    navigationBarTitleText: "个人",
     disableScroll: true, // 微信禁止页面滚动
-    'app-plus': {
-      bounce: 'none', // 禁用 iOS 弹性效果
+    "app-plus": {
+      bounce: "none", // 禁用 iOS 弹性效果
     },
   },
 }
@@ -17,28 +17,12 @@
     <view class="avatar-area">
       <!-- prettier-ignore -->
       <wd-img width="100" height="100" :round="true" :radius="50" :src="personalList.avatar ? personalList.avatar : defAvatar" @click="ChooseImage"></wd-img>
+      <wd-text
+        custom-class="title"
+        :text="personalList.realname ? personalList.realname : realname"
+      ></wd-text>
     </view>
-    <view class="info-area shadow-warp mb-5">
-      <view class="user">
-        <wd-text
-          custom-class="title"
-          :text="personalList.realname ? personalList.realname : realname"
-        ></wd-text>
-        <view class="tag">
-          <view class="cuIcon-people mr-1"></view>
-          <wd-text text="用户"></wd-text>
-        </view>
-      </view>
-      <view class="job">
-        <!-- prettier-ignore -->
-        <wd-text custom-class="title":text="personalList.post ? personalList.post : '员工'"></wd-text>
-        <view class="tag">
-          <view class="cuIcon-news mr-1"></view>
-          <wd-text text="职务"></wd-text>
-        </view>
-      </view>
-    </view>
-    <scroll-view scroll-y>
+    <scroll-view scroll-y style="margin-top: 20px;">
       <wd-cell-group custom-class="shadow-warp" border clickable>
         <template v-for="(item, index) in dataSource" :key="index">
           <wd-cell :title="item.title" is-link @click="handleCell(item)">
@@ -53,11 +37,11 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, watch, onBeforeUnmount } from 'vue'
-import { cache, getFileAccessHttpUrl, hasRoute } from '@/common/uitls'
-import { onLaunch, onShow, onHide, onLoad, onReady } from '@dcloudio/uni-app'
-import { useToast, useMessage, useNotify } from 'wot-design-uni'
-import { useRouter } from '@/plugin/uni-mini-router'
+import { ref, reactive, watch, onBeforeUnmount } from "vue";
+import { cache, getFileAccessHttpUrl, hasRoute } from "@/common/uitls";
+import { onLaunch, onShow, onHide, onLoad, onReady } from "@dcloudio/uni-app";
+import { useToast, useMessage, useNotify } from "wot-design-uni";
+import { useRouter } from "@/plugin/uni-mini-router";
 import {
   ACCESS_TOKEN,
   USER_NAME,
@@ -65,219 +49,209 @@ import {
   APP_ROUTE,
   APP_CONFIG,
   HOME_CONFIG_EXPIRED_TIME,
-} from '@/common/constants'
-import { http } from '@/utils/http'
-import { useUserStore } from '@/store/user'
-import useUpload from '@/hooks/useUpload'
-import { getEnvBaseUrl } from '@/utils/index'
+} from "@/common/constants";
+import { http } from "@/utils/http";
+import { useUserStore } from "@/store/user";
+import useUpload from "@/hooks/useUpload";
+import { getEnvBaseUrl } from "@/utils/index";
 
 //
-const userStore = useUserStore()
-const toast = useToast()
-const router = useRouter()
-const message = useMessage()
-const defAvatar = 'https://static.jeecg.com/upload/test/login4_1595818039175.png'
+const userStore = useUserStore();
+const toast = useToast();
+const router = useRouter();
+const message = useMessage();
+const defAvatar = "/static/avatar.png";
 const personalList = reactive({
-  avatar: '',
-  realname: '',
-  username: '',
-  post: '',
-  depart: '',
-})
-const userId = ref(userStore.userInfo.userid)
-const realname = ref(userStore.userInfo.realname)
-const id = ref('')
-let stopWatch: any = null
+  avatar: "",
+  realname: "",
+  username: "",
+  post: "",
+  depart: "",
+});
+console.log(userStore.userInfo);
+const userId = ref(userStore.userInfo.client_id);
+const token = ref(userStore.userInfo.token);
+const realname = ref();
+const id = ref("");
+let stopWatch: any = null;
 const api = {
-  positionUrl: '/sys/position/list',
-  departUrl: '/sys/user/userDepartList',
-  userUrl: '/sys/user/queryById',
-  postUrl: '/sys/position/queryByCode',
+  positionUrl: "/sys/position/list",
+  departUrl: "/sys/user/userDepartList",
+  userUrl: "/v1/users/",
+  postUrl: "/sys/position/queryByCode",
   uploadUrl: `${getEnvBaseUrl()}/sys/common/upload`,
-}
+};
 const dataSource = [
-  { key: 'organization', title: '组织', class: 'cuIcon-taoxiaopu text-cyan' },
-  { key: 'scan', title: '扫码', class: 'cuIcon-scan text-red' },
-  { key: 'location', title: '定位', class: 'cuIcon-location text-cyan' },
-  { key: 'setttings', title: '设置', class: 'cuIcon-settingsfill text-cyan' },
-  { key: 'exit', title: '退出', class: 'cuIcon-exit text-yellow' },
-]
+  // { key: "setttings", title: "设置", class: "cuIcon-settingsfill text-cyan" },
+  { key: "location", title: "关于智趣猴平台", class: "cuIcon-location text-cyan" },
+  { key: "exit", title: "退出", class: "cuIcon-exit text-yellow" },
+];
 
 const load = () => {
   if (!userId.value) {
-    return
+    return;
   }
   http
-    .get(api.userUrl, { id: userId.value })
+    .get(api.userUrl + "/" + userId.value, { access_token: token.value })
     .then((res: any) => {
-      if (res.success) {
-        let perArr = res.result
-        let avatar =
-          perArr.avatar && perArr.avatar.length > 0
-            ? getFileAccessHttpUrl(perArr.avatar)
-            : '/static/avatar_boy.png'
-        personalList.avatar = avatar
-        personalList.realname = perArr.realname
-        personalList.username = perArr.username
-        personalList.depart = perArr.departIds
-        getpost(perArr.post)
+      if (res.status === 0) {
+        let userInfo = res.result;
+        realname.value = userInfo.name;
       }
     })
     .catch((err) => {
-      console.log(err)
-    })
-}
+      console.log(err);
+    });
+};
 const getpost = (code) => {
   if (!code || code.length == 0) {
-    personalList.post = '员工'
-    return false
+    personalList.post = "员工";
+    return false;
   }
   http
     .get(api.postUrl, { params: { code: code } })
     .then((res: any) => {
-      console.log('postUrl', res)
+      console.log("postUrl", res);
       if (res.success) {
-        personalList.post = res.result.name
+        personalList.post = res.result.name;
       }
     })
     .catch((err) => {
-      console.log(err)
-    })
-}
+      console.log(err);
+    });
+};
 
 const ChooseImage = (params) => {
-  const { loading, data, error, run } = useUpload({ name: 'file' }, { url: api.uploadUrl })
-  if (stopWatch) stopWatch()
-  run()
+  const { loading, data, error, run } = useUpload(
+    { name: "file" },
+    { url: api.uploadUrl },
+  );
+  if (stopWatch) stopWatch();
+  run();
   stopWatch = watch(
     () => [loading.value, error.value, data.value],
     ([loading, err, data], oldValue) => {
       if (loading == false) {
         if (err) {
           // toast.warning('修改失败')
-          uni.hideLoading()
+          uni.hideLoading();
         } else {
           if (data) {
-            editAvatar(data.message)
+            editAvatar(data.message);
           }
         }
       }
     },
-  )
-}
+  );
+};
 const editAvatar = (avatar) => {
   http
-    .put('/sys/user/appEdit', { id: userId.value, avatar })
+    .put("/sys/user/appEdit", { id: userId.value, avatar })
     .then((res: any) => {
       if (res.success) {
-        toast.success('修改成功~')
-        userStore.editUserInfo({ avatar: getFileAccessHttpUrl(avatar) })
-        personalList.avatar = getFileAccessHttpUrl(avatar)
+        toast.success("修改成功~");
+        userStore.editUserInfo({ avatar: getFileAccessHttpUrl(avatar) });
+        personalList.avatar = getFileAccessHttpUrl(avatar);
       } else {
-        toast.warning(res.message)
+        toast.warning(res.message);
       }
-      uni.hideLoading()
+      uni.hideLoading();
     })
     .catch((err) => {
-      uni.hideLoading()
-      toast.warning('修改失败')
-    })
-}
+      uni.hideLoading();
+      toast.warning("修改失败");
+    });
+};
 const scan = () => {
   // #ifndef H5
   uni.scanCode({
     success: function (res) {
-      console.log('条码res：' + res)
-      console.log('条码类型：' + res.scanType)
-      console.log('条码内容：' + res.result)
+      console.log("条码res：" + res);
+      console.log("条码类型：" + res.scanType);
+      console.log("条码内容：" + res.result);
       //条码内容包含QRCODELOGIN则是去扫码登录的逻辑
-      if (res.result.indexOf('QRCODELOGIN') != -1) {
+      if (res.result.indexOf("QRCODELOGIN") != -1) {
         const data = {
           qrcodeId: res.result,
           token: userStore.userInfo.token,
-        }
+        };
         http({
-          url: '/sys/scanLoginQrcode',
+          url: "/sys/scanLoginQrcode",
           data,
-          header: { 'content-type': 'application/x-www-form-urlencoded' },
-          method: 'POST',
+          header: { "content-type": "application/x-www-form-urlencoded" },
+          method: "POST",
         }).then((res: any) => {
-          console.log('扫码接口返回内容res：', res)
+          console.log("扫码接口返回内容res：", res);
           if (res.success) {
-            toast.success(res.result)
+            toast.success(res.result);
           } else {
-            toast.warning(res.result)
+            toast.warning(res.result);
           }
-        })
+        });
       }
     },
-  })
+  });
   // #endif
   // #ifdef H5
-  toast.warning('H5暂不支持')
+  toast.warning("H5暂不支持");
   // #endif
-}
+};
 const exit = () => {
   message
     .confirm({
-      title: '提示',
-      msg: '确定退出吗？',
+      title: "提示",
+      msg: "确定退出吗？",
     })
     .then(() => {
-      userStore.clearUserInfo()
-      router.replaceAll({ name: 'login' })
-    })
-}
+      userStore.clearUserInfo();
+      router.replaceAll({ name: "login" });
+    });
+};
 const handleCell = (item) => {
   switch (item.key) {
-    case 'scan':
-      scan()
-      break
-    case 'location':
-      router.push({ name: 'location' })
-      break
-    case 'organization':
-      router.push({ name: 'organization' })
-      break
-    case 'setttings':
-      router.push({ name: 'userDetail' })
-      break
-    case 'exit':
-      exit()
-      break
+    case "scan":
+      scan();
+      break;
+    case "location":
+      // router.push({ name: "location" });
+      break;
+    case "organization":
+      router.push({ name: "organization" });
+      break;
+    case "setttings":
+      router.push({ name: "userDetail" });
+      break;
+    case "exit":
+      exit();
+      break;
     default:
-      toast.show('功能暂未开发~')
+      toast.show("功能暂未开发~");
   }
-}
+};
 onBeforeUnmount(() => {
-  stopWatch?.()
-})
+  stopWatch?.();
+});
 onLoad(() => {
-  load()
-})
+  load();
+});
 </script>
 
 <style lang="scss" scoped>
 //
 .avatar-area {
-  /* #ifdef MP-WEIXIN */
-  background-image: url('https://static.jeecg.com/upload/test/blue_1595818030310.png');
-  /* #endif */
-  /* #ifndef MP-WEIXIN */
-  background-image: url('@/static/blue.png');
-  /* #endif */
+  background-color: white;
   background-size: cover;
   height: 400upx;
   display: flex;
-  justify-content: center;
+  justify-content: left;
   padding-top: 40upx;
+  padding-left: 80upx;
   overflow: hidden;
   position: relative;
-  flex-direction: column;
   align-items: center;
-  color: #fff;
-  font-weight: 300;
-  text-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+  color: black;
+  font-weight: bold;
+  font-size: 18px;
 }
 .info-area {
   display: flex;
