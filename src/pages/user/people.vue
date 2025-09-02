@@ -82,7 +82,7 @@ const api = {
   uploadUrl: `${getEnvBaseUrl()}/sys/common/upload`,
 };
 const dataSource = [
-  // { key: "setttings", title: "设置", class: "cuIcon-settingsfill text-cyan" },
+  { key: "setttings", title: "设置", class: "cuIcon-settingsfill text-cyan" },
   { key: "location", title: "关于智趣猴平台", class: "cuIcon-info text-cyan" },
   { key: "exit", title: "退出", class: "cuIcon-exit text-yellow" },
 ];
@@ -214,7 +214,7 @@ const handleCell = (item) => {
       scan();
       break;
     case "location":
-      //router.push({ name: "userDetail" });
+      router.push({ name: "organization" });
       break;
     case "organization":
       router.push({ name: "organization" });

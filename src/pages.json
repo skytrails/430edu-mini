@@ -369,8 +369,8 @@
           "type": "page",
           "layout": "default",
           "style": {
-            "navigationBarTitleText": "",
             "navigationStyle": "custom",
+            "navigationBarTitleText": "个人",
             "disableScroll": true,
             "app-plus": {
               "bounce": "none"

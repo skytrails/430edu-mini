@@ -1,175 +1,306 @@
 <route lang="json5" type="page">
 {
-  layout: 'default',
+  layout: "default",
   style: {
-    navigationBarTitleText: '',
-    navigationStyle: 'custom',
+    navigationStyle: "custom",
+    navigationBarTitleText: "个人",
     disableScroll: true, // 微信禁止页面滚动
-    'app-plus': {
-      bounce: 'none', // 禁用 iOS 弹性效果
+    "app-plus": {
+      bounce: "none", // 禁用 iOS 弹性效果
     },
   },
 }
 </route>
 
 <template>
-  <PageLayout
-    navTitle="切换租户和部门"
-    backRouteName="people"
-    routeMethod="pushTab"
-  >
-    <wd-form custom-class="pt3" ref="form" :model="model" v-if="isMultiTenant || isMultiDepart">
-      <wd-cell-group border>
-        <wd-select-picker
-            v-if="isMultiTenant"
-            label="租户"
-            filterable
-            type="radio"
-            v-model="model.tenantId"
-            :columns="tenantColumns"
-            placeholder="请选择租户"
-            size="large"
-            :show-confirm="false"
-            :safe-area-inset-bottom="false"
-        ></wd-select-picker>
-        <wd-select-picker
-            v-if="isMultiDepart"
-            label="部门"
-            type="radio"
-            filterable
-            v-model="model.departId"
-            :columns="deptColumns"
-            placeholder="请选择部门"
-            size="large"
-            :show-confirm="false"
-            :safe-area-inset-bottom="false"
-        ></wd-select-picker>
-      </wd-cell-group>
-      <view class="footer p5">
-        <wd-button type="primary" @click="handleSubmit" block>提交</wd-button>
-      </view>
-    </wd-form>
-    <view v-else>
-      <wd-status-tip image="content" tip="暂无部门和租户配置" />
+  <PageLayout :navbarShow="true" navTitle="关于智趣猴平台">
+    <view class="avatar-area">
+      <image src="/static/logo.png" mode="aspectFit" class="logo"></image>
     </view>
+    <scroll-view scroll-y style="background: white">
+      <wd-cell-group clickable>
+        <template v-for="(item, index) in dataSource" :key="index">
+          <wd-cell
+            :title="item.title"
+            style="background: white"
+            is-link
+            @click="handleCell(item)"
+          >
+          </wd-cell>
+        </template>
+      </wd-cell-group>
+    </scroll-view>
   </PageLayout>
 </template>
 
 <script lang="ts" setup>
-import { http } from '@/utils/http'
-import { useToast, useMessage, useNotify, dayjs } from 'wot-design-uni'
-import { useRouter } from '@/plugin/uni-mini-router'
-import { useUserStore } from '@/store/user'
+import { ref, reactive, watch, onBeforeUnmount } from "vue";
+import { cache, getFileAccessHttpUrl, hasRoute } from "@/common/uitls";
+import { onLaunch, onShow, onHide, onLoad, onReady } from "@dcloudio/uni-app";
+import { useToast, useMessage, useNotify } from "wot-design-uni";
+import { useRouter } from "@/plugin/uni-mini-router";
+import {
+  ACCESS_TOKEN,
+  USER_NAME,
+  USER_INFO,
+  APP_ROUTE,
+  APP_CONFIG,
+  HOME_CONFIG_EXPIRED_TIME,
+} from "@/common/constants";
+import { http } from "@/utils/http";
+import { useUserStore } from "@/store/user";
+import useUpload from "@/hooks/useUpload";
+import { getEnvBaseUrl } from "@/utils/index";
 
-defineOptions({
-  name: 'organization',
-  options: {
-    styleIsolation: 'shared',
-  },
-})
+//
+const userStore = useUserStore();
 const toast = useToast();
 const router = useRouter();
-const userStore = useUserStore();
+const message = useMessage();
+const defAvatar = "/static/avatar.png";
+const personalList = reactive({
+  avatar: "",
+  realname: "",
+  username: "",
+  post: "",
+  depart: "",
+});
+console.log(userStore.userInfo);
+const userId = ref(userStore.userInfo.client_id);
+const token = ref(userStore.userInfo.token);
+const realname = ref();
+const id = ref("");
+let stopWatch: any = null;
+const api = {
+  positionUrl: "/sys/position/list",
+  departUrl: "/sys/user/userDepartList",
+  userUrl: "/v1/users/",
+  postUrl: "/sys/position/queryByCode",
+  uploadUrl: `${getEnvBaseUrl()}/sys/common/upload`,
+};
+const dataSource = [
+  { key: "service", title: "服务协议", class: "cuIcon-settingsfill text-cyan" },
+  { key: "privacy", title: "隐私协议", class: "cuIcon-info text-cyan" },
+];
 
-const isMultiTenant = ref(false);
-const tenantColumns =  ref([])
-
-const isMultiDepart = ref(false);
-const deptColumns = ref([])
-
-const model = ref({
-  tenantId:0,
-  departId:""
-})
-/**
- *加载部门信息
- */
-async function loadDepartList() {
-  const res:any = await http.get("/sys/user/getCurrentUserDeparts");
-  let { result } = res;
-  if (!result.list || result.list.length == 0) {
+const load = () => {
+  console.log("------", userId.value);
+  if (!userId.value) {
     return;
   }
-  console.log("loadTenantList ***  deptColumns.value", deptColumns.value);
-  deptColumns.value = result.list.map(item=>{
-    return {
-      label:item.departName,
-      value:item.orgCode
-    }
-  });;
-  model.value.departId = result.orgCode;
-  isMultiDepart.value = true;
-}
-
-/**
- *加载租户信息
- */
-async function loadTenantList() {
-  const res:any = await http.get("/sys/tenant/getCurrentUserTenant");
-  let { result } = res;
-  if (!result.list || result.list.length == 0) {
-    return;
-  }
-  tenantColumns.value = result.list.map(item=>{
-    return {
-      label:item.name,
-      value:item.id
-    }
-  });
-  model.value.tenantId = userStore.userInfo.tenantId as any;
-  isMultiTenant.value = true;
-}
-
-/**
- *提交表单
- */
-async function handleSubmit() {
-  departResolve()
-      .then(() => {
-        let originalTenant = userStore.getTenant();
-        if (unref(isMultiTenant) && originalTenant != unref(model).tenantId) {
-          const data = http.put("/sys/user/changeLoginTenantId",{loginTenantId: unref(model).tenantId })
-          userStore.setTenant(unref(model).tenantId);
-        }
-        toast.success('切换成功');
-      })
-      .catch((e) => {
-        console.log('登录选择出现问题', e);
-      })
-}
-
-/**
- *切换选择部门
- */
-function departResolve() {
-  return new Promise(async (resolve, reject) => {
-    if (!unref(isMultiDepart)) {
-      resolve(true);
-    } else {
-      const res:any = await http.put('/sys/selectDepart',{
-        username: userStore.userInfo.username,
-        orgCode: model.value.departId,
-        loginTenantId: model.value.tenantId,
-      });
-      if (res.success && res.result.userInfo) {
-        const userInfo =  res.result.userInfo;
-        let currentUserInfo = userStore.getUserInfo();
-        userStore.setUserInfo(Object.assign(currentUserInfo,userInfo));
-        resolve(true);
-      } else {
-        reject();
+  http
+    .get(api.userUrl + userId.value, { access_token: token.value })
+    .then((res: any) => {
+      if (res.status === 0) {
+        let userInfo = res.result;
+        realname.value = userInfo.name;
       }
-    }
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+};
+const getpost = (code) => {
+  if (!code || code.length == 0) {
+    personalList.post = "员工";
+    return false;
+  }
+  http
+    .get(api.postUrl, { params: { code: code } })
+    .then((res: any) => {
+      console.log("postUrl", res);
+      if (res.success) {
+        personalList.post = res.result.name;
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+};
+
+const ChooseImage = (params) => {
+  const { loading, data, error, run } = useUpload(
+    { name: "file" },
+    { url: api.uploadUrl },
+  );
+  if (stopWatch) stopWatch();
+  run();
+  stopWatch = watch(
+    () => [loading.value, error.value, data.value],
+    ([loading, err, data], oldValue) => {
+      if (loading == false) {
+        if (err) {
+          // toast.warning('修改失败')
+          uni.hideLoading();
+        } else {
+          if (data) {
+            editAvatar(data.message);
+          }
+        }
+      }
+    },
+  );
+};
+const editAvatar = (avatar) => {
+  http
+    .put("/sys/user/appEdit", { id: userId.value, avatar })
+    .then((res: any) => {
+      if (res.success) {
+        toast.success("修改成功~");
+        userStore.editUserInfo({ avatar: getFileAccessHttpUrl(avatar) });
+        personalList.avatar = getFileAccessHttpUrl(avatar);
+      } else {
+        toast.warning(res.message);
+      }
+      uni.hideLoading();
+    })
+    .catch((err) => {
+      uni.hideLoading();
+      toast.warning("修改失败");
+    });
+};
+const scan = () => {
+  // #ifndef H5
+  uni.scanCode({
+    success: function (res) {
+      console.log("条码res：" + res);
+      console.log("条码类型：" + res.scanType);
+      console.log("条码内容：" + res.result);
+      //条码内容包含QRCODELOGIN则是去扫码登录的逻辑
+      if (res.result.indexOf("QRCODELOGIN") != -1) {
+        const data = {
+          qrcodeId: res.result,
+          token: userStore.userInfo.token,
+        };
+        http({
+          url: "/sys/scanLoginQrcode",
+          data,
+          header: { "content-type": "application/x-www-form-urlencoded" },
+          method: "POST",
+        }).then((res: any) => {
+          console.log("扫码接口返回内容res：", res);
+          if (res.success) {
+            toast.success(res.result);
+          } else {
+            toast.warning(res.result);
+          }
+        });
+      }
+    },
   });
-}
-onMounted(async ()=>{
-  //加载部门
-  await loadDepartList();
-  //加载租户
-  await loadTenantList();
-})
+  // #endif
+  // #ifdef H5
+  toast.warning("H5暂不支持");
+  // #endif
+};
+const exit = () => {
+  message
+    .confirm({
+      title: "提示",
+      msg: "确定退出吗？",
+    })
+    .then(() => {
+      userStore.clearUserInfo();
+      router.replaceAll({ name: "login" });
+    });
+};
+const handleCell = (item) => {
+  switch (item.key) {
+    case "scan":
+      scan();
+      break;
+    case "service":
+      uni.navigateTo({ url: "/pages/agreement/index" });
+      break;
+    case "privacy":
+      uni.navigateTo({ url: "/pages/privacy/index" });
+      break;
+    case "setttings":
+      router.push({ name: "userDetail" });
+      break;
+    case "exit":
+      exit();
+      break;
+    default:
+      toast.show("功能暂未开发~");
+  }
+};
+onBeforeUnmount(() => {
+  stopWatch?.();
+});
+onLoad(() => {
+  load();
+});
+onShow(() => {
+  load();
+});
 </script>
 
 <style lang="scss" scoped>
-
+//
+.avatar-area {
+  background-color: white;
+  background-size: cover;
+  height: 380upx;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  align-items: center;
+  color: black;
+  font-weight: bold;
+  font-size: 18px;
+}
+.info-area {
+  display: flex;
+  padding: 30upx;
+  background-color: #fff;
+  color: #8799a3;
+  :deep(.wd-text.is-default) {
+    color: var(--color-grey);
+  }
+  .user,
+  .job {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    .tag {
+      display: flex;
+      align-items: center;
+    }
+    :deep(.wd-text.title) {
+      font-size: 18px;
+      min-height: 18px;
+      margin-bottom: 16upx;
+    }
+  }
+  .user {
+    border-right: 0.5px solid rgba(0, 0, 0, 0.1);
+    :deep(.wd-text.title) {
+      color: #f37b1d;
+    }
+  }
+  .job {
+    :deep(.wd-text.title) {
+      color: #39b54a;
+    }
+  }
+}
+:deep(.wd-cell-group) {
+  margin: 0 26upx;
+  border-radius: 18upx;
+  overflow: hidden;
+  --wot-cell-line-height: 32px;
+  .wd-cell {
+    --wot-cell-title-fs: 15px;
+    --wot-cell-title-color: var(--color-grey);
+    .wd-cell__left {
+      font-size: 15px;
+    }
+  }
+}
+.logo {
+  width: 180upx;
+}
 </style>
