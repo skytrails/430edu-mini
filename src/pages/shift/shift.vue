@@ -13,7 +13,7 @@
 </route>
 
 <template>
-  <PageLayout :navbarShow="false">
+  <PageLayout :navbarShow="true" :navLeftArrow="false">
     <view
       style="
         height: 48px;

@@ -12,12 +12,12 @@
 </route>
 
 <template>
-  <PageLayout :navbarShow="false">
+  <PageLayout :navbarShow="true">
     <view class="page-container">
       <view class="text-center">
         <view class="logo-bg">
           <image
-            src="/static/app/icons/logo.png"
+            src="/static/logo.png"
             mode="aspectFit"
             class="logo"
           ></image>
@@ -144,7 +144,7 @@ defineOptions({
   },
 });
 const router = useRouter();
-const defLogo = "https://static.jeecg.com/files/app_logo.png";
+const defLogo = "static/logo.png";
 const shape = ref();
 const loading = ref(false);
 const userName = ref();

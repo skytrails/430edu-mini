@@ -66,7 +66,6 @@ export default ({ command, mode }) => {
           'src/pages-home',
           'src/pages-message',
           'src/pages-user',
-          'src/pages-work',
           'src/pages-sub',
         ], // 是个数组，可以配置多个，但是不能为pages里面的目录
         dts: 'src/types/uni-pages.d.ts',

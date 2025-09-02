@@ -30,10 +30,6 @@ interface NavigateToOptions {
        "/pages-user/organization/organization" |
        "/pages-user/userDetail/userDetail" |
        "/pages-user/userEdit/userEdit" |
-       "/pages-work/dragPage/index" |
-       "/pages-work/onlinePage/onlineAdd" |
-       "/pages-work/onlinePage/onlineDetail" |
-       "/pages-work/onlinePage/onlineEdit" |
        "/pages-sub/online/online" |
        "/pages-sub/online/onlineCard" |
        "/pages-sub/online/onlineTable";

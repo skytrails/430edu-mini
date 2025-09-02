@@ -196,7 +196,8 @@ console.log('props:', props)
   width: 100vw;
   height: 100vh;
   .pageNav {
-    background-image: linear-gradient(45deg, #0081ff, #1cbbb4);
+    // background: linear-gradient(45deg, #0081ff, #1cbbb4);
+    background: white;
     &.transparent {
       background-image: none;
     }

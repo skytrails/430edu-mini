@@ -13,7 +13,7 @@
 </route>
 
 <template>
-  <PageLayout :navbarShow="false">
+  <PageLayout :navbarShow="true" :navLeftArrow="false">
     <view class="avatar-area">
       <!-- prettier-ignore -->
       <wd-img width="100" height="100" :round="true" :radius="50" :src="personalList.avatar ? personalList.avatar : defAvatar" @click="ChooseImage"></wd-img>
@@ -88,11 +88,12 @@ const dataSource = [
 ];
 
 const load = () => {
+  console.log('------', userId.value)
   if (!userId.value) {
     return;
   }
   http
-    .get(api.userUrl + "/" + userId.value, { access_token: token.value })
+    .get(api.userUrl + userId.value, { access_token: token.value })
     .then((res: any) => {
       if (res.status === 0) {
         let userInfo = res.result;
@@ -232,6 +233,9 @@ onBeforeUnmount(() => {
   stopWatch?.();
 });
 onLoad(() => {
+  load();
+});
+onShow(()=> {
   load();
 });
 </script>

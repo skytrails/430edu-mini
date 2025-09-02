@@ -13,7 +13,7 @@
 </route>
 
 <template>
-  <PageLayout :navbarShow="false">
+  <PageLayout :navbarShow="true" :navLeftArrow="false">
     <view class="wrap">
       <view class="container">
         <view style="font-size: 32px">消息</view>

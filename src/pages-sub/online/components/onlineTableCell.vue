@@ -38,12 +38,6 @@
       </template>
     </template>
     <template v-else-if="column?.scopedSlots?.customRender === 'pcaSlot'">
-      <text class="ellipsis-2">
-        {{
-          getPcaText(record[column.dataIndex]) ||
-          '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
-        }}
-      </text>
     </template>
     <template v-else-if="column?.scopedSlots?.customRender === 'dateSlot'">
       <text class="ellipsis-2">
@@ -68,7 +62,6 @@
 import { getFormatDate, filterMultiDictText } from '../utils/index'
 import { isString } from '@/utils/is'
 import { getFileAccessHttpUrl } from '@/common/uitls'
-import { getAreaTextByCode } from '@/common/areaData/Area'
 import { downloadFile } from '@/common/uitls';
 defineOptions({
   name: 'onlineTableCell',
@@ -99,12 +92,6 @@ const handleDownload = (text) => {
   downloadFile(text)
 }
 // 省市区
-const getPcaText = (code) => {
-  if (!code) {
-    return ''
-  }
-  return getAreaTextByCode(code)
-}
 // 列表只显示第一张图
 const getFirstImg = (text) => {
   if (isString(text)) {
