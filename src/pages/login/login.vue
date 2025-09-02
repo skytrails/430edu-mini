@@ -16,11 +16,7 @@
     <view class="page-container">
       <view class="text-center">
         <view class="logo-bg">
-          <image
-            src="/static/logo.png"
-            mode="aspectFit"
-            class="logo"
-          ></image>
+          <image src="/static/logo.png" mode="aspectFit" class="logo"></image>
         </view>
         <!--view class="title text-shadow">{{ compTitle || 'JEECG BOOT' }}</view-->
         <view class="enter-area">
@@ -35,27 +31,14 @@
               ></wd-input>
             </view>
             <view class="box password">
-              <!--wd-icon name="lock-on" size="15px"></wd-icon-->
-              <!--wd-text text="密码："></wd-text-->
               <wd-input
                 class="uni-input"
                 prefix-icon="lock-on"
-                placeholder="请输入密码"
-                :show-password="showPassword"
                 v-model.trim="password"
+                clearable
+                show-password
+                @change="handleChange"
               />
-              <wd-icon
-                v-if="showPassword"
-                name="eye-close"
-                size="18px"
-                @click="handleChangePassword"
-              ></wd-icon>
-              <wd-icon
-                v-else
-                name="view"
-                size="18px"
-                @click="handleChangePassword"
-              ></wd-icon>
             </view>
           </view>
           <view v-else class="phone-login-area">
@@ -106,10 +89,17 @@
           >
             账户登录
           </wd-button>
-          <!--wd-button v-else custom-class="align-top" plain hairline @click="toggleLoginWay(2)">
-            短信登录
-          </wd-button-->
+          <view class="checkbox-area">
+            <wd-checkbox shape="square" v-model="agree"></wd-checkbox>
+            <view>
+              登录表示同意
+              <text class="link" @tap="goService">服务协议</text>
+              和
+              <text class="link" @tap="goPrivacy">隐私协议</text>
+            </view>
+          </view>
         </view>
+        <!-- 底部复选框 -->
       </view>
       <wd-notify />
     </view>
@@ -159,6 +149,7 @@ const toggleDelay = ref(false);
 const version = ref("");
 const compLogo = ref(defLogo);
 const compTitle = ref("智趣猴");
+const agree = ref(false);
 const paramsStore = useParamsStore();
 paramsStore.reset();
 // 是否开启本地路由配置
@@ -209,6 +200,13 @@ const handleSMSSend = () => {
     }
   });
 };
+const goService = () => {
+  uni.navigateTo({ url: "/pages/agreement/index" });
+};
+
+const goPrivacy = () => {
+  uni.navigateTo({ url: "/pages/privacy/index" });
+};
 const startSMSTimer = () => {
   smsCountInterval = setInterval(() => {
     smsCountDown.value--;
@@ -228,6 +226,11 @@ const hanldeLogin = () => {
   loginWay.value === 1 ? accountLogin() : phoneLogin();
 };
 const accountLogin = () => {
+  console.log("----agree:", agree.value);
+  if (!agree.value) {
+    toast.warning("请认真阅读并同意服务协议和隐私协议");
+    return;
+  }
   if (userName.value.length === 0) {
     toast.warning("请输入账号");
     return;
@@ -402,9 +405,11 @@ if (isLocalConfig === false) {
 //
 
 .page-container {
+  background: white;
   padding: 0 0upx;
   padding-top: 0upx;
   position: relative;
+  height: 100%;
   font-size: 15px;
   color: var(--UI-FG-0);
   .logo-bg {
@@ -471,6 +476,20 @@ if (isLocalConfig === false) {
       min-width: 100px;
       box-shadow: 3px 3px 4px rgba(0, 102, 204, 0.2);
     }
+  }
+  .checkbox-area {
+    position: fixed;
+    bottom: 200rpx; /* 距离底部的间距，可调整 */
+    font-size: 14px;
+    color: gray;
+    left: 0;
+    width: 100%;
+    display: flex;
+    padding-left: 75upx;
+    align-items: center;
+  }
+  .link {
+    color: #007aff;
   }
 }
 </style>

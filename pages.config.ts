@@ -3,8 +3,8 @@ import { defineUniPages } from "@uni-helper/vite-plugin-uni-pages";
 export default defineUniPages({
   globalStyle: {
     navigationStyle: "default",
-    navigationBarTitleText: "uniapp",
-    navigationBarBackgroundColor: "#f8f8f8",
+    navigationBarTitleText: "智趣猴",
+    navigationBarBackgroundColor: "#d07827",
     navigationBarTextStyle: "white",
     backgroundColor: "#000000",
   },

@@ -13,21 +13,13 @@
 </route>
 
 <template>
-  <PageLayout :navbarShow="true" :navLeftArrow="false">
-    <view
-      style="
-        height: 48px;
-        align-items: center;
-        justify-content: center;
-        display: flex;
-        background: white;
-        border-bottom: 1px solid rgba(200, 200, 200, 0.4);
-        font-size: 16px;
-        font-weight: bold;
-      "
-      >排班</view
-    >
-    <scroll-view scroll-y>
+  <PageLayout
+    :navbarShow="true"
+    :navLeftArrow="false"
+    navTitle="排班"
+    navLeftText=""
+  >
+    <scroll-view scroll-y style="background: white">
       <view class="shadow-warp" v-for="(item, index) in dataSource">
         <view class="content">
           <template v-if="index === 0">
@@ -46,7 +38,7 @@
       <view
         v-for="(item, index) in schedules"
         :key="index"
-        style="background: white; margin-top: 2px"
+        style="background: white"
       >
         <view class="container">
           <view class="left">

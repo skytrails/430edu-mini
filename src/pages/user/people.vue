@@ -13,7 +13,7 @@
 </route>
 
 <template>
-  <PageLayout :navbarShow="true" :navLeftArrow="false">
+  <PageLayout :navbarShow="true" :navLeftArrow="false" navLeftText="" navTitle="个人中心">
     <view class="avatar-area">
       <!-- prettier-ignore -->
       <wd-img width="100" height="100" :round="true" :radius="50" :src="personalList.avatar ? personalList.avatar : defAvatar" @click="ChooseImage"></wd-img>
@@ -83,7 +83,7 @@ const api = {
 };
 const dataSource = [
   // { key: "setttings", title: "设置", class: "cuIcon-settingsfill text-cyan" },
-  { key: "location", title: "关于智趣猴平台", class: "cuIcon-location text-cyan" },
+  { key: "location", title: "关于智趣猴平台", class: "cuIcon-info text-cyan" },
   { key: "exit", title: "退出", class: "cuIcon-exit text-yellow" },
 ];
 
@@ -214,7 +214,7 @@ const handleCell = (item) => {
       scan();
       break;
     case "location":
-      // router.push({ name: "location" });
+      //router.push({ name: "userDetail" });
       break;
     case "organization":
       router.push({ name: "organization" });

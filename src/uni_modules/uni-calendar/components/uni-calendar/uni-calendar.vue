@@ -429,7 +429,7 @@
 	}
 
 	.uni-calendar__content {
-		background-color: #fff;
+		background-color: #f0f0f0;
 	}
 
 	.uni-calendar__header {

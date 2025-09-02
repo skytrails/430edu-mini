@@ -155,9 +155,10 @@
 	}
 
 	.uni-calendar-item--isDay {
-		background-color: $uni-primary;
+		background-color: #D07827;
 		opacity: 0.8;
 		color: #fff;
+		border-radius: 50%;
 	}
 
 	.uni-calendar-item--extra {
@@ -166,9 +167,9 @@
 	}
 
 	.uni-calendar-item--checked {
-		background-color: $uni-primary;
+		background-color: #D07827;
 		color: #fff;
-		opacity: 0.8;
+		border-radius: 50%;
 	}
 
 	.uni-calendar-item--multiple {

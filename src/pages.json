@@ -1,8 +1,8 @@
 {
   "globalStyle": {
     "navigationStyle": "default",
-    "navigationBarTitleText": "uniapp",
-    "navigationBarBackgroundColor": "#f8f8f8",
+    "navigationBarTitleText": "智趣猴",
+    "navigationBarBackgroundColor": "#d07827",
     "navigationBarTextStyle": "white",
     "backgroundColor": "#000000"
   },
@@ -69,6 +69,10 @@
       "style": {
         "navigationBarTitleText": "关于"
       }
+    },
+    {
+      "path": "pages/agreement/index",
+      "type": "page"
     },
     {
       "path": "pages/annotation/annotationDetail",
@@ -198,6 +202,10 @@
           "bounce": "none"
         }
       }
+    },
+    {
+      "path": "pages/privacy/index",
+      "type": "page"
     },
     {
       "path": "pages/shift/shift",

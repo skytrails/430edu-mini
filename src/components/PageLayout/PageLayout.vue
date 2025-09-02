@@ -5,7 +5,10 @@
       :class="{ pageNav: true, transparent: navBgTransparent, fixed: navFixed }"
       :style="{ height: `${statusBarHeight + navHeight}px` }"
     >
-      <view class="statusBar" :style="{ height: `${statusBarHeight}px` }"></view>
+      <view
+        class="statusBar"
+        :style="{ height: `${statusBarHeight}px` }"
+      ></view>
       <wd-navbar
         :bordered="false"
         :title="navTitle"
@@ -23,8 +26,12 @@
           <!-- 为了在小程序上美观 -->
           <template v-if="$slots.navRight && isShowNavRightTextMp">
             <view class="btnGroup">
-              <view class="left" @click.stop="handleClickLeft">{{ navLeftText }}</view>
-              <view class="right" @click.stop="() => emit('navRightMp')">{{ navRightTextMp }}</view>
+              <view class="left" @click.stop="handleClickLeft">{{
+                navLeftText
+              }}</view>
+              <view class="right" @click.stop="() => emit('navRightMp')">{{
+                navRightTextMp
+              }}</view>
             </view>
           </template>
           <template v-else-if="$slots.navLeft">
@@ -32,7 +39,11 @@
           </template>
           <template v-else>
             <view class="mpNavLeft" @click.stop="handleClickLeft">
-              <wd-icon v-if="navLeftArrow" name="thin-arrow-left" size="14px"></wd-icon>
+              <wd-icon
+                v-if="navLeftArrow"
+                name="thin-arrow-left"
+                size="14px"
+              ></wd-icon>
               <view>{{ navLeftText }}</view>
             </view>
           </template>
@@ -44,7 +55,10 @@
         <slot></slot>
       </view>
       <!--微信中导航右侧的在这儿生成-->
-      <view class="navRight" v-if="isMp && !$slots.navRight && mpNavRightIsBottom && navRightText">
+      <view
+        class="navRight"
+        v-if="isMp && !$slots.navRight && mpNavRightIsBottom && navRightText"
+      >
         <wd-button @click="handleClickRight">{{ navRightText }}</wd-button>
       </view>
     </view>
@@ -53,29 +67,29 @@
 </template>
 
 <script setup lang="ts">
-import { useSlots } from 'vue'
-import { useRouter } from '@/plugin/uni-mini-router'
-import { useParamsStore } from '@/store/page-params'
-import { isMp } from '@/utils/platform'
+import { useSlots } from "vue";
+import { useRouter } from "@/plugin/uni-mini-router";
+import { useParamsStore } from "@/store/page-params";
+import { isMp } from "@/utils/platform";
 // const isMp = true
 defineOptions({
-  name: 'pageLayout',
+  name: "pageLayout",
   options: {
     // apply-shared‌：当前页面样式会影响到子组件样式.(小程序)
     // shared‌：当前页面样式影响到子组件，子组件样式也会影响到当前页面.(小程序)
-    styleIsolation: 'shared',
+    styleIsolation: "shared",
   },
-})
-const paramsStore = useParamsStore()
-const router = useRouter()
+});
+const paramsStore = useParamsStore();
+const router = useRouter();
 const props = defineProps({
   backRouteName: {
     type: String,
-    default: '',
+    default: "",
   },
   backRoutePath: {
     type: String,
-    default: '',
+    default: "",
   },
   routeParams: {
     type: Object,
@@ -87,7 +101,7 @@ const props = defineProps({
   },
   routeMethod: {
     type: String,
-    default: 'replace',
+    default: "replace",
   },
   navbarShow: {
     type: Boolean,
@@ -103,15 +117,15 @@ const props = defineProps({
   },
   type: {
     type: String,
-    default: 'page', // 'page','popup'
+    default: "page", // 'page','popup'
   },
   navTitle: {
     type: String,
-    default: '',
+    default: "",
   },
   navLeftText: {
     type: String,
-    default: '返回',
+    default: "返回",
   },
   navLeftArrow: {
     typeof: Boolean,
@@ -119,7 +133,7 @@ const props = defineProps({
   },
   navRightText: {
     typeof: String,
-    default: '',
+    default: "",
   },
   // 当有右侧有slot时，在小程序上不显示slot，显示文字 (默认显示)
   isShowNavRightTextMp: {
@@ -129,64 +143,70 @@ const props = defineProps({
   // 当有右侧有slot时，在小程序上不显示slot，显示文字
   navRightTextMp: {
     typeof: String,
-    default: '确定',
+    default: "确定",
   },
   // 右侧的文本在小程序端是否生成在页面底部（否：就得业务中自己写）
   mpNavRightIsBottom: {
     typeof: Boolean,
     default: true,
   },
-})
-const slot = useSlots()
-const globalData = getApp().globalData
-const { systemInfo, navHeight } = globalData
-const { statusBarHeight } = systemInfo
-const emit = defineEmits(['navBack', 'navRight', 'navRightMp'])
+});
+const slot = useSlots();
+const globalData = getApp().globalData;
+const { systemInfo, navHeight } = globalData;
+const { statusBarHeight } = systemInfo;
+const emit = defineEmits(["navBack", "navRight", "navRightMp"]);
 const handleClickLeft = () => {
-  emit('navBack')
+  emit("navBack");
   // 只有在页面中才默认返回，弹层中不返回
-  if (props.type === 'page') {
-    const pages = getCurrentPages()
+  if (props.type === "page") {
+    const pages = getCurrentPages();
     if (props.backRouteName || props.backRoutePath) {
-      const prevPage = pages[pages.length - 2]
+      const prevPage = pages[pages.length - 2];
       if (prevPage) {
-        const route = prevPage.route
-        const name = route.split('/').pop()
+        const route = prevPage.route;
+        const name = route.split("/").pop();
         if (route === props.backRoutePath || props.backRouteName === name) {
-          router.back()
-          clearPageParamsCache()
-          return
+          router.back();
+          clearPageParamsCache();
+          return;
         }
       }
       if (props.backRouteName) {
-        router[props.routeMethod]({ name: props.backRouteName, params: props.routeParams })
-        clearPageParamsCache()
+        router[props.routeMethod]({
+          name: props.backRouteName,
+          params: props.routeParams,
+        });
+        clearPageParamsCache();
       } else {
-        router[props.routeMethod]({ name: props.backRoutePath, query: props.routeQuery })
-        clearPageParamsCache()
+        router[props.routeMethod]({
+          name: props.backRoutePath,
+          query: props.routeQuery,
+        });
+        clearPageParamsCache();
       }
     } else {
-      router.back()
-      clearPageParamsCache()
+      router.back();
+      clearPageParamsCache();
     }
   }
-}
+};
 const clearPageParamsCache = () => {
   // 清除页面传参缓存
-  const pages = getCurrentPages()
-  const curPage = pages[pages.length - 1]
-  const curRoute = curPage.route
-  const name = curRoute.split('/').pop()
-  paramsStore.clearPageParams(name)
-}
+  const pages = getCurrentPages();
+  const curPage = pages[pages.length - 1];
+  const curRoute = curPage.route;
+  const name = curRoute.split("/").pop();
+  paramsStore.clearPageParams(name);
+};
 const handleClickRight = () => {
-  emit('navRight')
-}
+  emit("navRight");
+};
 const getClass = () => {
-  const cls = `nav ${isMp ? 'mp' : ''} ${slot.navRight ? 'slot_navRight' : ''}`
-  return cls
-}
-console.log('props:', props)
+  const cls = `nav ${isMp ? "mp" : ""} ${slot.navRight ? "slot_navRight" : ""}`;
+  return cls;
+};
+console.log("props:", props);
 </script>
 
 <style lang="scss" scoped>
@@ -197,7 +217,7 @@ console.log('props:', props)
   height: 100vh;
   .pageNav {
     // background: linear-gradient(45deg, #0081ff, #1cbbb4);
-    background: white;
+    background-color: rgba(208, 120, 39, 1);
     &.transparent {
       background-image: none;
     }
@@ -277,7 +297,7 @@ console.log('props:', props)
     border: 1px solid rgba(255, 255, 255, 0.6);
     height: 28px;
     line-height: 28px;
-    color: #fff;
+    color: #00f;
     align-items: center;
     .left {
       border-right: 1px solid rgba(255, 255, 255, 0.6);
@@ -291,7 +311,7 @@ console.log('props:', props)
   }
   .mpNavLeft {
     display: flex;
-    color: #fff;
+    color: #f00;
   }
 }
 </style>

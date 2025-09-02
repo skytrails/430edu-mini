@@ -6,6 +6,7 @@
 interface NavigateToOptions {
   url: "/pages/index/index" |
        "/pages/about/about" |
+       "/pages/agreement/index" |
        "/pages/annotation/annotationDetail" |
        "/pages/annotation/annotationList" |
        "/pages/demo/demo" |
@@ -16,6 +17,7 @@ interface NavigateToOptions {
        "/pages/login/login" |
        "/pages/message/message" |
        "/pages/more/more" |
+       "/pages/privacy/index" |
        "/pages/shift/shift" |
        "/pages/user/people" |
        "/pages/workHome/workHome" |
