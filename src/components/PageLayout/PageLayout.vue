@@ -297,7 +297,7 @@ console.log("props:", props);
     border: 1px solid rgba(255, 255, 255, 0.6);
     height: 28px;
     line-height: 28px;
-    color: #00f;
+    color: #fff;
     align-items: center;
     .left {
       border-right: 1px solid rgba(255, 255, 255, 0.6);
@@ -311,7 +311,7 @@ console.log("props:", props);
   }
   .mpNavLeft {
     display: flex;
-    color: #f00;
+    color: #fff;
   }
 }
 </style>
