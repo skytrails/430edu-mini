@@ -3,7 +3,7 @@
   layout: "default",
   style: {
     navigationStyle: "custom",
-    navigationBarTitleText: "个人",
+    navigationBarTitleText: "",
     disableScroll: true, // 微信禁止页面滚动
     "app-plus": {
       bounce: "none", // 禁用 iOS 弹性效果

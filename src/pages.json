@@ -55,7 +55,7 @@
       "type": "home",
       "layout": "default",
       "style": {
-        "navigationBarTitleText": "",
+        "navigationBarTitleText": "通讯录",
         "navigationStyle": "custom",
         "disableScroll": true,
         "app-plus": {
@@ -182,7 +182,7 @@
       "type": "page",
       "layout": "default",
       "style": {
-        "navigationBarTitleText": "",
+        "navigationBarTitleText": "消息",
         "navigationStyle": "custom",
         "disableScroll": true,
         "app-plus": {
@@ -212,7 +212,7 @@
       "type": "page",
       "layout": "default",
       "style": {
-        "navigationBarTitleText": "demo演示",
+        "navigationBarTitleText": "排班",
         "navigationStyle": "custom",
         "disableScroll": true,
         "app-plus": {
@@ -226,7 +226,7 @@
       "layout": "default",
       "style": {
         "navigationStyle": "custom",
-        "navigationBarTitleText": "个人",
+        "navigationBarTitleText": "",
         "disableScroll": true,
         "app-plus": {
           "bounce": "none"

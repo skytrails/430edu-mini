@@ -2,7 +2,7 @@
 {
   layout: "default",
   style: {
-    navigationBarTitleText: "",
+    navigationBarTitleText: "消息",
     navigationStyle: "custom",
     disableScroll: true, // 微信禁止页面滚动
     "app-plus": {
