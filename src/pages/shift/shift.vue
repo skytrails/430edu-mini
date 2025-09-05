@@ -20,20 +20,17 @@
     navLeftText=""
   >
     <scroll-view scroll-y style="background: white">
-      <view class="shadow-warp" v-for="(item, index) in dataSource">
-        <view class="content">
-          <template v-if="index === 0">
-            <uni-calendar
-              style="background-color: #f00"
-              class="uni-calendar--hook"
-              :showMonth="false"
-              :lunar="true"
-              @change="change"
-              @monthSwitch="monthChange"
-              :selected="selected"
-            />
-          </template>
-        </view>
+      <view class="content">
+        <uni-calendar
+          ref="calendarRef"
+          style="background-color: #f00"
+          class="uni-calendar--hook"
+          :showMonth="false"
+          :lunar="true"
+          @change="change"
+          @monthSwitch="monthChange"
+          :selected="selected"
+        />
       </view>
       <view
         v-for="(item, index) in schedules"
@@ -46,15 +43,51 @@
             <view>{{ formatTime(item.course_end_time) }}</view>
           </view>
           <view class="right">
-            <view style="font-size: 16px; font-weight: bold"
-              >{{ item.course_name }} ({{ item.classes_name }})</view
-            >
-            <view style="font-size: 12px; font-weight: bold"
-              >{{ item.primary_teacher_name }}/{{ item.second_teacher_name }}
+            <view>
+              <view
+                style="
+                  font-size: 16px;
+                  line-height: 18px;
+                  color: #191919;
+                  font-weight: 700;
+                "
+              >
+                {{ item.course_name
+                }}{{ item.classes_name ? ` (${item.classes_name})` : "" }}
+              </view>
+              <view
+                style="
+                  font-size: 14px;
+                  line-height: 14px;
+                  margin-top: 8px;
+                  color: #191919;
+                "
+              >
+                {{ item.primary_teacher_name }}/{{ item.second_teacher_name }}
+              </view>
+              <view
+                style="
+                  font-size: 13px;
+                  line-height: 13px;
+                  color: #7f7f7f;
+                  margin-top: 8px;
+                "
+              >
+                {{ item.classroom_address }}
+              </view>
             </view>
-            <view style="font-size: 10px; color: gray">{{
-              item.classroom_address
-            }}</view>
+
+            <!-- 新增按钮 -->
+            <view>
+              <button
+                class="btn"
+                style="margin-top: 5px; font-size: 12px"
+                @click="onButtonClick"
+                data-id="{{ item.id }}"
+              >
+                点名
+              </button>
+            </view>
           </view>
         </view>
       </view>
@@ -64,6 +97,7 @@
 
 <script lang="ts" setup>
 //
+import { onReady } from "@dcloudio/uni-app";
 import { ref } from "vue";
 import { useRouter } from "@/plugin/uni-mini-router";
 import { useToast, useMessage, useNotify } from "wot-design-uni";
@@ -75,6 +109,7 @@ import { useUserStore } from "@/store";
 const toast = useToast();
 const user = ref("");
 const dept = ref("");
+const calendarRef = ref(null);
 const message = useMessage();
 const { showNotify, closeNotify } = useNotify();
 const dateTime = ref();
@@ -159,6 +194,10 @@ const change = (e) => {
       // loading.value = false;
     });
 };
+const onButtonClick = () => {
+  console.log('----------btn click')
+  router.push({ path: "/pages/shift/info" });
+}
 const monthChange = (e) => {
   const userStore = useUserStore();
   const token = userStore.userInfo.token;
@@ -175,9 +214,61 @@ const monthChange = (e) => {
         console.log("---res:", res);
         console.log("---result:", result);
         selected.value = result.map((ts) => ({ date: formatDate(ts) }));
-        /*selected.value = [
-          { date: getDate(new Date(), 3).fullDate },
-        ];*/
+      } else {
+        toast.warning(res.message);
+      }
+    })
+    .finally(() => {
+      // loading.value = false;
+    });
+};
+
+const handleSkip = (path) => {
+  router.push({ path: path });
+};
+
+const load = () => {
+  console.log("----abc:", selected.value);
+  const userStore = useUserStore();
+  const token = userStore.userInfo.token;
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1;
+  const day = now.getDate();
+  console.log("----abc:", year);
+
+  if (!token) {
+    toast.warning("用户未登录");
+  }
+  let params = {
+    access_token: token,
+    year: year,
+    month: month,
+  };
+  http.get("/v1/course-schedules/schedule-range", params).then((res: any) => {
+    if (res.status === 0) {
+      const result = res.result;
+      console.log("---res:", res);
+      console.log("---result:", result);
+      selected.value = result.map((ts) => ({ date: formatDate(ts) }));
+    } else {
+      toast.warning(res.message);
+    }
+  });
+
+  const timestamp = new Date(`${year}-${month}-${day} 00:00:00`).getTime();
+  console.log("-----date:", timestamp);
+  params = {
+    access_token: token,
+    scheduleTime: timestamp,
+  };
+  http
+    .get("/v1/course-schedules/schedule", params)
+    .then((res: any) => {
+      if (res.status === 0) {
+        const result = res.result;
+        schedules.value = result.map((rs) => rs);
+        schedules.value.forEach((item) => console.log(item));
       } else {
         // toast.warning(res.message);
       }
@@ -186,85 +277,9 @@ const monthChange = (e) => {
       // loading.value = false;
     });
 };
-
-const proDataSource = [
-  {
-    activeStep: true,
-    data: [
-      { label: "流程节点：start" },
-      { label: "申请人：神经蛙02" },
-      { label: "申请时间：2023-12-06 16:15:14" },
-      { label: "已完成" },
-    ],
-  },
-  {
-    activeStep: false,
-    data: [
-      { label: "流程节点：填写" },
-      { label: "申请人：神经蛙01" },
-      { label: "申请时间：2023-12-06 16:15:14" },
-    ],
-  },
-  {
-    activeStep: false,
-    data: [
-      { label: "流程节点：填写" },
-      { label: "申请人：神经蛙03" },
-      { label: "申请时间：2023-12-06 16:15:14" },
-    ],
-  },
-];
-const dataSource = ref([
-  { title: "万年历组件" },
-  { title: "图片预览" },
-  // {
-  //   group: [
-  //     { title: '树组件', path: '/pages/demo/tree' },
-  //     { title: '通讯录', path: '/pages/demo/indexBar' },
-  //     { title: '单选多选', path: '/pages/demo/selectPicker' },
-  //     { title: '表单', path: '/pages/demo/form' },
-  //   ],
-  // },
-]);
-const handleSkip = (path) => {
-  router.push({ path: path });
-};
-const handleToast = (value) => {
-  switch (value) {
-    case 0:
-      // 909cb8
-      toast.info({ msg: "常规提示信息" });
-      break;
-    case 1:
-      // f0863b
-      toast.warning({ msg: "提示信息" });
-      break;
-    case 2:
-      // 33d19d
-      toast.success({ msg: "操作成功" });
-      break;
-    case 3:
-      // f04550
-      toast.error({ msg: "手机验证码输入错误，请重新输入" });
-      break;
-    case 4:
-      toast.show({ msg: "手机验证码输入错误，请重新输入" });
-      break;
-  }
-};
-const handleConfirm = (params) => {
-  message
-    .confirm({
-      msg: "提示文案",
-      title: "标题",
-    })
-    .then(() => {
-      showNotify({ type: "success", message: "点击了确认按钮" });
-    })
-    .catch(() => {
-      showNotify({ type: "warning", message: "点击了取消按钮" });
-    });
-};
+onReady(() => {
+  load();
+});
 </script>
 
 <style lang="scss" scoped>
@@ -288,8 +303,24 @@ const handleConfirm = (params) => {
 .right {
   /* 右侧内容样式 */
   width: 85%;
-  border-left: 2px solid rgba(208, 119, 37, 1);
-  padding-left: 8px;
+  border-left: 2px solid #ee782b;
+  padding: 4px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn {
+  width: 80px;
+  height: 30px;
+  font-size: 14px;
+  line-height: 30px;
+  text-align: center;
+  color: #ffffff;
+  background: #ee782b;
+  border-radius: 15px;
+  margin-left: 12px;
+  margin: auto;
 }
 //
 .mb-2 {

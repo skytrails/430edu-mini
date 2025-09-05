@@ -155,8 +155,8 @@ paramsStore.reset();
 // 是否开启本地路由配置
 let isLocalConfig = getApp().globalData.isLocalConfig;
 if (import.meta.env.MODE === "development") {
-  userName.value = "15119337951";
-  password.value = "X3a5Z8LmDP";
+  userName.value = "15768920110";
+  password.value = "Yh12345.";
 }
 
 if (import.meta.env.MODE === "production") {

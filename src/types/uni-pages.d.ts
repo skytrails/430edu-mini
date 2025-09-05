@@ -18,6 +18,7 @@ interface NavigateToOptions {
        "/pages/message/message" |
        "/pages/more/more" |
        "/pages/privacy/index" |
+       "/pages/shift/info" |
        "/pages/shift/shift" |
        "/pages/user/people" |
        "/pages/workHome/workHome" |

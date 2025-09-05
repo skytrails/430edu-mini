@@ -208,6 +208,19 @@
       "type": "page"
     },
     {
+      "path": "pages/shift/info",
+      "type": "page",
+      "layout": "default",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "点名册",
+        "disableScroll": true,
+        "app-plus": {
+          "bounce": "none"
+        }
+      }
+    },
+    {
       "path": "pages/shift/shift",
       "type": "page",
       "layout": "default",
