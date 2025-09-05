@@ -109,6 +109,7 @@ import { useUserStore } from "@/store";
 const toast = useToast();
 const user = ref("");
 const dept = ref("");
+const scheduleInfo = ref(null);
 const calendarRef = ref(null);
 const message = useMessage();
 const { showNotify, closeNotify } = useNotify();
@@ -186,6 +187,8 @@ const change = (e) => {
         const result = res.result;
         schedules.value = result.map((rs) => rs);
         schedules.value.forEach((item) => console.log(item));
+        scheduleInfo.value = result;
+        console.log("------scheduleInfo:", scheduleInfo);
       } else {
         // toast.warning(res.message);
       }
@@ -195,9 +198,19 @@ const change = (e) => {
     });
 };
 const onButtonClick = () => {
-  console.log('----------btn click')
-  router.push({ path: "/pages/shift/info" });
-}
+  const params = {
+    courseInfoId: scheduleInfo.value?.[0]?.course_info_id,
+    courseBeginTime: scheduleInfo.value?.[0]?.course_begin_time,
+    courseEndTime: scheduleInfo.value?.[0]?.course_end_time,
+    lesson: scheduleInfo.value?.[0]?.lesson,
+    scheduleTime: scheduleInfo.value?.[0]?.schedule_time,
+    classroomAddress: scheduleInfo.value?.[0]?.classroom_address,
+    courseTotal: scheduleInfo.value?.[0]?.course_total,
+    courseName: scheduleInfo.value?.[0]?.course_name,
+  };
+
+  router.push({ path: "/pages/shift/info", query: params });
+};
 const monthChange = (e) => {
   const userStore = useUserStore();
   const token = userStore.userInfo.token;
@@ -248,8 +261,6 @@ const load = () => {
   http.get("/v1/course-schedules/schedule-range", params).then((res: any) => {
     if (res.status === 0) {
       const result = res.result;
-      console.log("---res:", res);
-      console.log("---result:", result);
       selected.value = result.map((ts) => ({ date: formatDate(ts) }));
     } else {
       toast.warning(res.message);
@@ -269,6 +280,8 @@ const load = () => {
         const result = res.result;
         schedules.value = result.map((rs) => rs);
         schedules.value.forEach((item) => console.log(item));
+        scheduleInfo.value = result;
+        console.log("------scheduleInfo:", scheduleInfo);
       } else {
         // toast.warning(res.message);
       }

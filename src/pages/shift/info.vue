@@ -23,23 +23,25 @@
           @click="ChooseImage"
         ></wd-img>
         <div class="title">
-          <div class="title-01">pa拜谒测试</div>
-          <div class="title-02">1年1班</div>
+          <div class="title-01">{{ courseInfo.courseName }}</div>
+          <div class="title-02">{{ courseInfo.classroomAddress }}</div>
         </div>
       </div>
     </view>
     <view class="info-area mb-2">
       <view class="user">
-        <wd-text custom-class="title" :text="38"></wd-text>
+        <wd-text custom-class="title" :text="`${students.length}`"></wd-text>
         <view class="tag">
           <wd-text text="应到人数"></wd-text>
         </view>
       </view>
       <view class="job">
         <!-- prettier-ignore -->
-        <wd-text custom-class="title" text="第1节"></wd-text>
+        <wd-text custom-class="title" :text="`第${courseInfo.lesson}节`"></wd-text>
         <view class="tag">
-          <wd-text text="09:00 - 20:00"></wd-text>
+          <wd-text
+            :text="`${formatSecondsToHM(courseInfo.courseBeginTime)} - ${formatSecondsToHM(courseInfo.courseEndTime)}`"
+          ></wd-text>
         </view>
       </view>
     </view>
@@ -54,16 +56,28 @@
       <wd-tab v-for="item in tabs" :key="item.value" :title="item.label">
         <view class="tab-content">
           <scroll-view scroll-y class="scroll-box">
-            <view v-for="(it, index) in rolls" :key="index" class="list-item">
+            <view
+              v-for="(it, index) in studentList"
+              :key="index"
+              class="list-item"
+            >
               <view class="list-left">
                 <wd-img
+                  v-if="it.student_gender === 'FEMALE'"
                   width="36"
                   height="36"
                   round
                   src="/static/feman.png"
                 ></wd-img>
+                <wd-img
+                  v-else
+                  width="36"
+                  height="36"
+                  round
+                  src="/static/man.png"
+                ></wd-img>
                 <view>
-                  {{ it.name }}
+                  {{ it.student_name }}
                 </view>
               </view>
               <view class="list-right">
@@ -76,6 +90,11 @@
         </view>
       </wd-tab>
     </wd-tabs>
+    <view class="floating-btn">
+      <view class="btn-item btn-black radius">已到：3</view>
+      <view class="btn-item btn-black">缺勤：1</view>
+      <view class="btn-item" @click="handleClick">提交</view>
+    </view>
   </PageLayout>
 </template>
 
@@ -100,15 +119,14 @@ import { getEnvBaseUrl } from "@/utils/index";
 
 //
 const userStore = useUserStore();
+const courseInfo = ref(null);
 const toast = useToast();
 const router = useRouter();
 const message = useMessage();
+const students = ref([]);
 const personalList = reactive({
-  avatar: "",
-  realname: "",
-  username: "",
-  post: "",
-  depart: "",
+  name: "",
+  sex: "",
 });
 const userId = ref(userStore.userInfo.userid);
 const realname = ref(userStore.userInfo.realname);
@@ -123,7 +141,7 @@ let stopWatch: any = null;
 const api = {
   positionUrl: "/sys/position/list",
   departUrl: "/sys/user/userDepartList",
-  userUrl: "/sys/user/queryById",
+  studentsUrl: "/v1/rollbooks/students",
   postUrl: "/sys/position/queryByCode",
   uploadUrl: `${getEnvBaseUrl()}/sys/common/upload`,
 };
@@ -142,24 +160,31 @@ const tabs = [
   { value: 5, label: "乘坐校巴" },
 ];
 
-const load = () => {
-  if (!userId.value) {
-    return;
-  }
+const studentList = ref([]);
+
+// 将秒数转成 HH:mm
+const formatSecondsToHM = (seconds: number) => {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+};
+
+const load = (options) => {
+  const userStore = useUserStore();
+  const token = userStore.userInfo.token;
+  const params = {
+    scheduleTime: options.scheduleTime,
+    courseInfoId: options.courseInfoId,
+    lesson: options.lesson,
+    access_token: token,
+    classesName: null,
+  };
   http
-    .get(api.userUrl, { id: userId.value })
+    .get(api.studentsUrl, params)
     .then((res: any) => {
-      if (res.success) {
-        let perArr = res.result;
-        let avatar =
-          perArr.avatar && perArr.avatar.length > 0
-            ? getFileAccessHttpUrl(perArr.avatar)
-            : "/static/avatar_boy.png";
-        personalList.avatar = avatar;
-        personalList.realname = perArr.realname;
-        personalList.username = perArr.username;
-        personalList.depart = perArr.departIds;
-        getpost(perArr.post);
+      if (res.status === 0) {
+        students.value = res.result;
+        studentList.value = res.result;
       }
     })
     .catch((err) => {
@@ -236,29 +261,14 @@ const exit = () => {
       router.replaceAll({ name: "login" });
     });
 };
-const handleCell = (item) => {
-  switch (item.key) {
-    case "location":
-      router.push({ name: "location" });
-      break;
-    case "organization":
-      router.push({ name: "organization" });
-      break;
-    case "setttings":
-      router.push({ name: "userDetail" });
-      break;
-    case "exit":
-      exit();
-      break;
-    default:
-      toast.show("功能暂未开发~");
-  }
+const handleClick = (item) => {
 };
 onBeforeUnmount(() => {
   stopWatch?.();
 });
-onLoad(() => {
-  // load();
+onLoad((options) => {
+  courseInfo.value = options;
+  load(options);
 });
 </script>
 
@@ -378,5 +388,42 @@ onLoad(() => {
   align-content: center;
   gap: 16px;
   color: #ee782b;
+}
+/* 悬浮按钮 */
+.floating-btn {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 85%;
+  height: 45px; /* 父容器高度，可根据需求调整 */
+  border-radius: 24px;
+  background: #ee782b;
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch; /* 子元素高度跟父容器一致 */
+  padding: 0; /* 内边距去掉，方便按钮充满高度 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-item {
+  flex: 1;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 0; /* 先去掉圆角，后面单独设置 */
+  font-size: 16px;
+  color: white;
+  height: 100%; /* 高度跟父容器一致 */
+}
+
+.btn-item.radius {
+  border-top-left-radius: 24px;
+  border-bottom-left-radius: 24px;
+}
+
+.btn-black {
+  background: black;
 }
 </style>
