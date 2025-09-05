@@ -66,8 +66,14 @@
       animated
       autoLineWidth
       lineHeight="2"
+      @click="handleClick"
     >
-      <wd-tab v-for="item in tabs" :key="item.value" :title="item.label">
+      <wd-tab
+        v-for="item in tabs"
+        :key="item.value"
+        :name="item.label"
+        :title="item.label"
+      >
         <view class="tab-content">
           <scroll-view scroll-y class="scroll-box">
             <view
@@ -159,7 +165,7 @@
     <view class="floating-btn">
       <view class="btn-item btn-black radius">已到：3</view>
       <view class="btn-item btn-black">缺勤：1</view>
-      <view class="btn-item" @click="handleClick">提交</view>
+      <view class="btn-item" @click="handleSubmit">提交</view>
     </view>
   </PageLayout>
 </template>
@@ -350,10 +356,18 @@ const exit = () => {
       router.replaceAll({ name: "login" });
     });
 };
-const handleClick = (item) => {};
-onBeforeUnmount(() => {
-  stopWatch?.();
-});
+const handleClick = (item) => {
+  if (item.index === 0) {
+    studentList.value = students.value;
+  } else {
+    studentList.value = students.value.filter(
+      (student) => student.after_course == item.name,
+    );
+  }
+};
+
+const handleSubmit = (item) => {};
+
 onLoad((options) => {
   courseInfo.value = options;
   load(options);
