@@ -16,12 +16,7 @@
   <PageLayout NavTitle="abc">
     <view class="avatar-area flex">
       <div class="flex">
-        <wd-img
-          width="64"
-          height="64"
-          src="/static/logo.png"
-          @click="ChooseImage"
-        ></wd-img>
+        <wd-img width="64" height="64" src="/static/logo.png"></wd-img>
         <div class="title">
           <div class="title-01">{{ courseInfo.courseName }}</div>
           <div class="title-02">{{ courseInfo.classroomAddress }}</div>
@@ -77,6 +72,7 @@
         <view class="tab-content">
           <scroll-view scroll-y class="scroll-box">
             <view
+              v-if="studentList.length > 0"
               v-for="(it, index) in studentList"
               :key="index"
               class="list-item"
@@ -134,6 +130,17 @@
                 </view>
               </view>
             </view>
+            <view v-else>333</view>
+            <wd-status-tip
+              v-else
+              v-if="!loading"
+              image="content"
+              tip="暂无内容"
+            />
+            <view class="loading-box" v-if="loading">
+              <wd-loading size="50px" color="#ee782b" />
+              <text class="loading-text">加载中...</text>
+            </view>
           </scroll-view>
         </view>
       </wd-tab>
@@ -163,9 +170,18 @@
       </view>
     </wd-popup>
     <view class="floating-btn">
-      <view class="btn-item btn-black radius">已到：3</view>
-      <view class="btn-item btn-black">缺勤：1</view>
-      <view class="btn-item" @click="handleSubmit">提交</view>
+      <view class="btn-item btn-black radius"
+        >已到：{{ statistic.signed }}</view
+      >
+      <view class="btn-item btn-black">缺勤：{{ statistic.absent }}</view>
+      <!--view class="btn-item" @click="handleSubmit">提交</view-->
+      <view class="btn-item" @click="handleSubmit">
+        <template v-if="submitting">
+          <wd-loading size="18px" color="#FFF" />
+          <text class="loading-text">提交中...</text>
+        </template>
+        <template v-else> 提交 </template>
+      </view>
     </view>
   </PageLayout>
 </template>
@@ -191,6 +207,7 @@ import { getEnvBaseUrl } from "@/utils/index";
 
 //
 const userStore = useUserStore();
+const statistic = ref({ signed: 0, absent: 0 });
 const courseInfo = ref(null);
 const toast = useToast();
 const router = useRouter();
@@ -199,6 +216,7 @@ const students = ref([]);
 const show = ref(false);
 const teacherPhone = ref("");
 const householderPhone = ref("");
+const submitting = ref(false);
 const personalList = reactive({
   name: "",
   sex: "",
@@ -214,18 +232,10 @@ let rolls = [
 const id = ref("");
 let stopWatch: any = null;
 const api = {
-  positionUrl: "/sys/position/list",
-  departUrl: "/sys/user/userDepartList",
   studentsUrl: "/v1/rollbooks/students",
-  postUrl: "/sys/position/queryByCode",
-  uploadUrl: `${getEnvBaseUrl()}/sys/common/upload`,
+  submitUrl: "/v1/rollbooks/submit-roll",
 };
-const dataSource = [
-  { key: "organization", title: "组织", class: "cuIcon-taoxiaopu text-cyan" },
-  { key: "location", title: "定位", class: "cuIcon-location text-cyan" },
-  { key: "setttings", title: "设置", class: "cuIcon-settingsfill text-cyan" },
-  { key: "exit", title: "退出", class: "cuIcon-exit text-yellow" },
-];
+
 const tabs = [
   { value: 0, label: "全部" },
   { value: 1, label: "留校托管" },
@@ -236,6 +246,7 @@ const tabs = [
 ];
 
 const studentList = ref([]);
+const loading = ref(true);
 
 // 将秒数转成 HH:mm
 const formatSecondsToHM = (seconds: number) => {
@@ -254,75 +265,53 @@ const load = (options) => {
     access_token: token,
     classesName: null,
   };
+  loading.value = true;
   http
     .get(api.studentsUrl, params)
     .then((res: any) => {
       if (res.status === 0) {
         students.value = res.result;
         studentList.value = res.result;
+        statistic.value.signed = students.value.filter(
+          (s) => s.roll_book_state === "COME",
+        ).length;
+        statistic.value.absent = students.value.filter(
+          (s) => s.roll_book_state === "NO_COME",
+        ).length;
       }
+      loading.value = false;
+    })
+    .finally(() => {
+      loading.value = false;
     })
     .catch((err) => {
-      console.log(err);
-    });
-};
-const getpost = (code) => {
-  if (!code || code.length == 0) {
-    personalList.post = "员工";
-    return false;
-  }
-  http
-    .get(api.postUrl, { params: { code: code } })
-    .then((res: any) => {
-      console.log("postUrl", res);
-      if (res.success) {
-        personalList.post = res.result.name;
-      }
-    })
-    .catch((err) => {
+      loading.value = false;
       console.log(err);
     });
 };
 
-const ChooseImage = (params) => {
-  const { loading, data, error, run } = useUpload(
-    { name: "file" },
-    { url: api.uploadUrl },
-  );
-  if (stopWatch) stopWatch();
-  run();
-  stopWatch = watch(
-    () => [loading.value, error.value, data.value],
-    ([loading, err, data], oldValue) => {
-      if (loading == false) {
-        if (err) {
-          // toast.warning('修改失败')
-          uni.hideLoading();
-        } else {
-          if (data) {
-            editAvatar(data.message);
-          }
-        }
-      }
-    },
-  );
-};
 const handleContact = (e) => {
   show.value = true;
   householderPhone.value = e.householder_phone || "无";
   teacherPhone.value = e.teacher_phone || "无";
 };
+function updateStateById(studentId: string, state: string) {
+  const student = students.value.find((s) => s.student_id === studentId);
+  if (student) {
+    student.roll_book_state = state;
+  }
+}
 const handleAbsent = (e) => {
-  console.log("-----absent");
-  // show.value = true;
-  // householderPhone.value = e.householder_phone || "无";
-  // teacherPhone.value = e.teacher_phone || "无";
+  console.log("-----absent", e);
+  statistic.value.signed -= 1;
+  statistic.value.absent += 1;
+  updateStateById(e.student_id, "NO_COME");
 };
 const handleSign = (e) => {
   console.log("-----sign");
-  // show.value = true;
-  // householderPhone.value = e.householder_phone || "无";
-  // teacherPhone.value = e.teacher_phone || "无";
+  statistic.value.signed += 1;
+  statistic.value.absent -= 1;
+  updateStateById(e.student_id, "COME");
 };
 const handlePopupClose = (e) => {
   show.value = false;
@@ -345,17 +334,6 @@ const editAvatar = (avatar) => {
       toast.warning("修改失败");
     });
 };
-const exit = () => {
-  message
-    .confirm({
-      title: "提示",
-      msg: "确定退出吗？",
-    })
-    .then(() => {
-      userStore.clearUserInfo();
-      router.replaceAll({ name: "login" });
-    });
-};
 const handleClick = (item) => {
   if (item.index === 0) {
     studentList.value = students.value;
@@ -366,7 +344,42 @@ const handleClick = (item) => {
   }
 };
 
-const handleSubmit = (item) => {};
+const handleSubmit = () => {
+  const userStore = useUserStore();
+  const token = userStore.userInfo.token;
+  const userId = userStore.userInfo.userid;
+  students.value.forEach((s) => {
+    s.come = s.roll_book_state === "COME";
+  });
+  const body = {
+    course_info_id: courseInfo.value.courseInfoId,
+    teacher_user_id: userId,
+    lesson: courseInfo.value.lesson,
+    course_begin_time: courseInfo.value.courseBeginTime,
+    course_end_time: courseInfo.value.courseEndTime,
+    classes_name: "",
+    course_time: courseInfo.value.scheduleTime,
+    students: students.value,
+  };
+  console.log("-----body:", body);
+  submitting.value = true;
+  http
+    .post(api.submitUrl + "?access_token=" + token, body)
+    .then((res: any) => {
+      if (res.status === 0) {
+        console.log(res);
+        toast.success("提交成功");
+        //router.back();
+      }
+    })
+    .finally(() => {
+      submitting.value = false;
+    })
+    .catch((err) => {
+      console.log(err);
+      toast.success("提交失败");
+    });
+};
 
 onLoad((options) => {
   courseInfo.value = options;
@@ -467,6 +480,9 @@ onLoad((options) => {
 .scroll-box {
   flex: 1; /* 关键：scroll-view 占满剩余高度 */
   overflow: auto; /* 保证超出时滚动 */
+  align-content: center;
+  justify-content: center;
+  align-items: center;
 }
 :deep(.wd-tabs__line) {
   background-color: #ee782b !important; /* 修改底部条颜色 */
@@ -524,6 +540,10 @@ onLoad((options) => {
   border-top-left-radius: 24px;
   border-bottom-left-radius: 24px;
 }
+.loading-text {
+  margin-left: 10rpx;
+  font-size: 28rpx;
+}
 
 .btn-black {
   background: black;
@@ -556,5 +576,16 @@ onLoad((options) => {
 .pop-title-02 {
   font-size: 12px;
   color: #7f7f7f;
+}
+.loading-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* 水平居中 */
+  align-items: center; /* 垂直居中 */
+  padding: 40rpx 0; /* 加点内边距，不会贴太紧 */
+}
+.loading-text {
+  font-weight: 700;
+  color: #fff;
 }
 </style>
