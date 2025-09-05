@@ -36,8 +36,22 @@
         </view>
       </view>
       <view class="job">
-        <!-- prettier-ignore -->
-        <wd-text custom-class="title" :text="`第${courseInfo.lesson}节`"></wd-text>
+        <view
+          class="flex"
+          style="
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 700;
+          "
+        >
+          <view>第</view>
+          <wd-text
+            custom-class="title"
+            :text="`${courseInfo.lesson}`"
+          ></wd-text>
+          <view>节</view>
+        </view>
         <view class="tag">
           <wd-text
             :text="`${formatSecondsToHM(courseInfo.courseBeginTime)} - ${formatSecondsToHM(courseInfo.courseEndTime)}`"
@@ -79,9 +93,21 @@
                 <view>
                   {{ it.student_name }}
                 </view>
+                <wd-tag
+                  v-if="it.roll_book_state === 'COME'"
+                  custom-class="space"
+                  bg-color="rgba(0, 190, 90, 1)"
+                  >已到</wd-tag
+                >
+                <wd-tag
+                  v-if="it.roll_book_state === 'NO_COME'"
+                  custom-class="space"
+                  type="danger"
+                  >缺勤</wd-tag
+                >
               </view>
               <view class="list-right">
-                <view> 联系人 </view>
+                <view @click="handleContact(it)"> 联系人 </view>
                 <view> 缺勤 </view>
                 <view> 签到 </view>
               </view>
@@ -90,6 +116,30 @@
         </view>
       </wd-tab>
     </wd-tabs>
+    <wd-popup
+      v-model="show"
+      root-portal
+      position="center"
+      custom-style="height: 200px; width: 75vw; border-radius: 8px;"
+      closable
+      @close="handlePopupClose"
+    >
+      <text class="pop-title center mt-3">联系人</text>
+      <view class="mt-8 ml-6 mr-8 flex pop-group center">
+        <view>
+          <view class="pop-title-01">班主任</view>
+          <view class="pop-title-02 mt-2">{{ teacherPhone }}</view>
+        </view>
+        <view class="pop-btn">呼叫</view>
+      </view>
+      <view class="mt-4 ml-6 mr-8 flex pop-group center">
+        <view>
+          <view class="pop-title-01">家长</view>
+          <view class="pop-title-02 mt-2">{{ householderPhone }}</view>
+        </view>
+        <view class="pop-btn">呼叫</view>
+      </view>
+    </wd-popup>
     <view class="floating-btn">
       <view class="btn-item btn-black radius">已到：3</view>
       <view class="btn-item btn-black">缺勤：1</view>
@@ -124,6 +174,9 @@ const toast = useToast();
 const router = useRouter();
 const message = useMessage();
 const students = ref([]);
+const show = ref(false);
+const teacherPhone = ref("");
+const householderPhone = ref("");
 const personalList = reactive({
   name: "",
   sex: "",
@@ -232,6 +285,14 @@ const ChooseImage = (params) => {
     },
   );
 };
+const handleContact = (e) => {
+  show.value = true;
+  householderPhone.value = e.householder_phone || "无";
+  teacherPhone.value = e.teacher_phone || "无";
+};
+const handlePopupClose = (e) => {
+  show.value = false;
+};
 const editAvatar = (avatar) => {
   http
     .put("/sys/user/appEdit", { id: userId.value, avatar })
@@ -261,8 +322,7 @@ const exit = () => {
       router.replaceAll({ name: "login" });
     });
 };
-const handleClick = (item) => {
-};
+const handleClick = (item) => {};
 onBeforeUnmount(() => {
   stopWatch?.();
 });
@@ -304,7 +364,7 @@ onLoad((options) => {
       align-items: center;
     }
     :deep(.wd-text.title) {
-      font-size: 18px;
+      font-size: 28px;
       min-height: 18px;
       margin-bottom: 16upx;
     }
@@ -312,12 +372,12 @@ onLoad((options) => {
   .user {
     border-right: 0.5px solid rgba(0, 0, 0, 0.1);
     :deep(.wd-text.title) {
-      color: #f37b1d;
+      color: #ee782b;
     }
   }
   .job {
     :deep(.wd-text.title) {
-      color: #39b54a;
+      color: #ee782b;
     }
   }
 }
@@ -333,7 +393,7 @@ onLoad((options) => {
   font-weight: 700;
   line-height: 14px;
   margin-top: 8px;
-  margin-left: 8px;
+  margin-left: 14px;
 }
 
 .title-02 {
@@ -341,7 +401,7 @@ onLoad((options) => {
   font-size: 12px;
   font-weight: 400;
   margin-top: 8px;
-  margin-left: 8px;
+  margin-left: 14px;
 }
 .tabs-container {
   display: flex;
@@ -425,5 +485,34 @@ onLoad((options) => {
 
 .btn-black {
   background: black;
+}
+:deep(.space) {
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+.pop-title {
+  font-weight: bold;
+  font-size: 18px;
+}
+.pop-group {
+  justify-content: space-between;
+}
+.pop-btn {
+  background: #ee782b;
+  text-align: center;
+  align-content: center;
+  border-radius: 14px;
+  width: 80px;
+  height: 30px;
+  color: white;
+}
+.pop-title-01 {
+  font-size: 16px;
+  font-weight: 500;
+  color: #1f1f1f;
+}
+.pop-title-02 {
+  font-size: 12px;
+  color: #7f7f7f;
 }
 </style>
