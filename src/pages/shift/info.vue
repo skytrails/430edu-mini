@@ -108,8 +108,24 @@
               </view>
               <view class="list-right">
                 <view @click="handleContact(it)"> 联系人 </view>
-                <view> 缺勤 </view>
-                <view> 签到 </view>
+                <view
+                  v-if="
+                    it.roll_book_state === 'COME' ||
+                    it.roll_book_state === 'NONE'
+                  "
+                  @click="handleAbsent(it)"
+                >
+                  缺勤
+                </view>
+                <view
+                  v-if="
+                    it.roll_book_state === 'NO_COME' ||
+                    it.roll_book_state === 'NONE'
+                  "
+                  @click="handleSign(it)"
+                >
+                  签到
+                </view>
               </view>
             </view>
           </scroll-view>
@@ -289,6 +305,18 @@ const handleContact = (e) => {
   show.value = true;
   householderPhone.value = e.householder_phone || "无";
   teacherPhone.value = e.teacher_phone || "无";
+};
+const handleAbsent = (e) => {
+  console.log("-----absent");
+  // show.value = true;
+  // householderPhone.value = e.householder_phone || "无";
+  // teacherPhone.value = e.teacher_phone || "无";
+};
+const handleSign = (e) => {
+  console.log("-----sign");
+  // show.value = true;
+  // householderPhone.value = e.householder_phone || "无";
+  // teacherPhone.value = e.teacher_phone || "无";
 };
 const handlePopupClose = (e) => {
   show.value = false;
