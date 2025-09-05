@@ -28,7 +28,7 @@
         </div>
       </div>
     </view>
-    <view class="info-area shadow-warp mb-5">
+    <view class="info-area mb-2">
       <view class="user">
         <wd-text custom-class="title" :text="38"></wd-text>
         <view class="tag">
@@ -51,15 +51,30 @@
       autoLineWidth
       lineHeight="2"
     >
-      <view v-for="item in tabs" :key="item.value" class="tab-pane">
-        <wd-tab :title="`${item.label}`">
-          <view class="tab-content">
-            <scroll-view scroll-y class="scroll-box">
-              <view>内容{{ item.label }}</view>
-            </scroll-view>
-          </view>
-        </wd-tab>
-      </view>
+      <wd-tab v-for="item in tabs" :key="item.value" :title="item.label">
+        <view class="tab-content">
+          <scroll-view scroll-y class="scroll-box">
+            <view v-for="(it, index) in rolls" :key="index" class="list-item">
+              <view class="list-left">
+                <wd-img
+                  width="36"
+                  height="36"
+                  round
+                  src="/static/feman.png"
+                ></wd-img>
+                <view>
+                  {{ it.name }}
+                </view>
+              </view>
+              <view class="list-right">
+                <view> 联系人 </view>
+                <view> 缺勤 </view>
+                <view> 签到 </view>
+              </view>
+            </view>
+          </scroll-view>
+        </view>
+      </wd-tab>
     </wd-tabs>
   </PageLayout>
 </template>
@@ -88,8 +103,6 @@ const userStore = useUserStore();
 const toast = useToast();
 const router = useRouter();
 const message = useMessage();
-const defAvatar =
-  "https://static.jeecg.com/upload/test/login4_1595818039175.png";
 const personalList = reactive({
   avatar: "",
   realname: "",
@@ -99,6 +112,12 @@ const personalList = reactive({
 });
 const userId = ref(userStore.userInfo.userid);
 const realname = ref(userStore.userInfo.realname);
+let rolls = [
+  { id: 0, name: "张三", type: 0, sex: 0 },
+  { id: 0, name: "王五", type: 0, sex: 0 },
+  { id: 1, name: "李四", type: 2, sex: 1 },
+  { id: 1, name: "卓七", type: 2, sex: 1 },
+];
 const id = ref("");
 let stopWatch: any = null;
 const api = {
@@ -249,7 +268,7 @@ onLoad(() => {
   background: white;
   height: 200upx;
   display: flex;
-  padding: 40upx;
+  padding: 100upx 40upx;
   justify-content: center;
   overflow: hidden;
   position: relative;
@@ -258,7 +277,7 @@ onLoad(() => {
 }
 .info-area {
   display: flex;
-  padding: 30upx;
+  padding: 40upx 0upx;
   background-color: #fff;
   color: #8799a3;
   :deep(.wd-text.is-default) {
@@ -289,19 +308,6 @@ onLoad(() => {
   .job {
     :deep(.wd-text.title) {
       color: #39b54a;
-    }
-  }
-}
-:deep(.wd-cell-group) {
-  margin: 0 26upx;
-  border-radius: 18upx;
-  overflow: hidden;
-  --wot-cell-line-height: 32px;
-  .wd-cell {
-    --wot-cell-title-fs: 15px;
-    --wot-cell-title-color: var(--color-grey);
-    .wd-cell__left {
-      font-size: 15px;
     }
   }
 }
@@ -352,5 +358,25 @@ onLoad(() => {
 }
 :deep(.wd-tabs__line) {
   background-color: #ee782b !important; /* 修改底部条颜色 */
+}
+.list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  align-content: center;
+  margin: 16px 18px;
+}
+.list-left {
+  display: flex;
+  align-items: center;
+  align-content: center;
+  gap: 10px;
+}
+.list-right {
+  display: flex;
+  align-items: center;
+  align-content: center;
+  gap: 16px;
+  color: #ee782b;
 }
 </style>
