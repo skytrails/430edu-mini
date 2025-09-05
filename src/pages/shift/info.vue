@@ -130,7 +130,6 @@
                 </view>
               </view>
             </view>
-            <view v-else>333</view>
             <wd-status-tip
               v-else
               v-if="!loading"
