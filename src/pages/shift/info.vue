@@ -70,6 +70,10 @@
         :title="item.label"
       >
         <view class="tab-content">
+          <view class="loading-box" v-if="loading">
+            <wd-loading size="50px" color="#ee782b" />
+            <text class="loading-text">加载中...</text>
+          </view>
           <scroll-view scroll-y class="scroll-box">
             <view
               v-if="studentList.length > 0"
@@ -136,10 +140,6 @@
               image="content"
               tip="暂无内容"
             />
-            <view class="loading-box" v-if="loading">
-              <wd-loading size="50px" color="#ee782b" />
-              <text class="loading-text">加载中...</text>
-            </view>
           </scroll-view>
         </view>
       </wd-tab>
@@ -271,6 +271,7 @@ const load = (options) => {
       if (res.status === 0) {
         students.value = res.result;
         studentList.value = res.result;
+
         statistic.value.signed = students.value.filter(
           (s) => s.roll_book_state === "COME",
         ).length;
@@ -460,28 +461,23 @@ onLoad((options) => {
 .tabs-container {
   display: flex;
   flex-direction: column;
-  color: #000;
-  height: 100vh; /* 或者 100% 父容器 */
+  flex: 1;
+  min-height: 0;
 }
 
-.tab-pane {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
 
 .tab-content {
   flex: 1;
   display: flex;
   flex-direction: column;
+  height: calc(50vh); /* ⚠️ scroll-view 才能占满 */
+  padding-bottom: 40px;
 }
 
 .scroll-box {
   flex: 1; /* 关键：scroll-view 占满剩余高度 */
-  overflow: auto; /* 保证超出时滚动 */
-  align-content: center;
-  justify-content: center;
-  align-items: center;
+  min-height: 0;
+  overflow: auto;
 }
 :deep(.wd-tabs__line) {
   background-color: #ee782b !important; /* 修改底部条颜色 */

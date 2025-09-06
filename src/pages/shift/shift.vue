@@ -197,6 +197,18 @@ const change = (e) => {
       // loading.value = false;
     });
 };
+
+function isToday(timestamp: number): boolean {
+  const date = new Date(timestamp);
+  const today = new Date();
+
+  return (
+    date.getFullYear() === today.getFullYear() &&
+    date.getMonth() === today.getMonth() &&
+    date.getDate() === today.getDate()
+  );
+}
+
 const onButtonClick = () => {
   const params = {
     courseInfoId: scheduleInfo.value?.[0]?.course_info_id,
@@ -208,6 +220,10 @@ const onButtonClick = () => {
     courseTotal: scheduleInfo.value?.[0]?.course_total,
     courseName: scheduleInfo.value?.[0]?.course_name,
   };
+  if (!isToday(params.scheduleTime)) {
+    toast.warning("课程不是今天的不可点名");
+    return;
+  }
 
   router.push({ path: "/pages/shift/info", query: params });
 };

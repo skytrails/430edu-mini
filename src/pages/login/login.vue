@@ -162,8 +162,8 @@ if (import.meta.env.MODE === "development") {
 if (import.meta.env.MODE === "production") {
   // userName.value = "15119337951";
   // password.value = "X3a5Z8LmDP";
-  userName.value = "15768920110";
-  password.value = "Yh12345.";
+  // userName.value = "15768920110";
+  // password.value = "Yh12345.";
 }
 
 const isSendSMSEnable = computed(() => {
