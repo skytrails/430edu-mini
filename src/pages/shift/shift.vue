@@ -202,11 +202,10 @@ function isToday(timestamp: number): boolean {
   const date = new Date(timestamp);
   const today = new Date();
 
-  return (
-    date.getFullYear() === today.getFullYear() &&
-    date.getMonth() === today.getMonth() &&
-    date.getDate() === today.getDate()
-  );
+  // 把今天的时间重置为 00:00:00，方便比较
+  today.setHours(0, 0, 0, 0);
+
+  return date.getTime() <= today.getTime();
 }
 
 const onButtonClick = () => {
@@ -221,7 +220,7 @@ const onButtonClick = () => {
     courseName: scheduleInfo.value?.[0]?.course_name,
   };
   if (!isToday(params.scheduleTime)) {
-    toast.warning("课程不是今天的不可点名");
+    toast.warning("未来日期不可点名");
     return;
   }
 

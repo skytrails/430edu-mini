@@ -32,6 +32,7 @@ export const http = <T>(options: CustomRequestOptions) => {
         'V-Sign': vSign,
         'X-TIMESTAMP': signMd5Utils.getTimestamp(),
       },
+      timeout: 10000,
       ...options,
       // 响应成功
       success(res) {
