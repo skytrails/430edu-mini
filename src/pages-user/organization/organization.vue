@@ -99,23 +99,6 @@ const load = () => {
       console.log(err);
     });
 };
-const getpost = (code) => {
-  if (!code || code.length == 0) {
-    personalList.post = "员工";
-    return false;
-  }
-  http
-    .get(api.postUrl, { params: { code: code } })
-    .then((res: any) => {
-      console.log("postUrl", res);
-      if (res.success) {
-        personalList.post = res.result.name;
-      }
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-};
 
 const ChooseImage = (params) => {
   const { loading, data, error, run } = useUpload(
