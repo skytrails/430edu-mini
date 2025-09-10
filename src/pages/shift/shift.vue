@@ -77,12 +77,12 @@
               </view>
             </view>
 
-            <!-- 新增按钮 -->
+            <!-- 点名按钮 -->
             <view>
               <button
                 class="btn"
                 style="margin-top: 5px; font-size: 12px"
-                @click="onButtonClick"
+                @click="onButtonClick(index)"
                 data-id="{{ item.id }}"
               >
                 点名
@@ -188,9 +188,8 @@ const change = (e) => {
         schedules.value = result.map((rs) => rs);
         schedules.value.forEach((item) => console.log(item));
         scheduleInfo.value = result;
-        console.log("------scheduleInfo:", scheduleInfo);
       } else {
-        // toast.warning(res.message);
+        toast.warning(res.message);
       }
     })
     .finally(() => {
@@ -208,16 +207,16 @@ function isToday(timestamp: number): boolean {
   return date.getTime() <= today.getTime();
 }
 
-const onButtonClick = () => {
+const onButtonClick = (idx) => {
   const params = {
-    courseInfoId: scheduleInfo.value?.[0]?.course_info_id,
-    courseBeginTime: scheduleInfo.value?.[0]?.course_begin_time,
-    courseEndTime: scheduleInfo.value?.[0]?.course_end_time,
-    lesson: scheduleInfo.value?.[0]?.lesson,
-    scheduleTime: scheduleInfo.value?.[0]?.schedule_time,
-    classroomAddress: scheduleInfo.value?.[0]?.classroom_address,
-    courseTotal: scheduleInfo.value?.[0]?.course_total,
-    courseName: scheduleInfo.value?.[0]?.course_name,
+    courseInfoId: scheduleInfo.value?.[idx]?.course_info_id,
+    courseBeginTime: scheduleInfo.value?.[idx]?.course_begin_time,
+    courseEndTime: scheduleInfo.value?.[idx]?.course_end_time,
+    lesson: scheduleInfo.value?.[idx]?.lesson,
+    scheduleTime: scheduleInfo.value?.[idx]?.schedule_time,
+    classroomAddress: scheduleInfo.value?.[idx]?.classroom_address,
+    courseTotal: scheduleInfo.value?.[idx]?.course_total,
+    courseName: scheduleInfo.value?.[idx]?.course_name,
   };
   if (!isToday(params.scheduleTime)) {
     toast.warning("未来日期不可点名");
@@ -239,8 +238,6 @@ const monthChange = (e) => {
     .then((res: any) => {
       if (res.status === 0) {
         const result = res.result;
-        console.log("---res:", res);
-        console.log("---result:", result);
         selected.value = result.map((ts) => ({ date: formatDate(ts) }));
       } else {
         toast.warning(res.message);
@@ -256,14 +253,12 @@ const handleSkip = (path) => {
 };
 
 const load = () => {
-  console.log("----abc:", selected.value);
   const userStore = useUserStore();
   const token = userStore.userInfo.token;
   const now = new Date();
   const year = now.getFullYear();
   const month = now.getMonth() + 1;
   const day = now.getDate();
-  console.log("----abc:", year);
 
   if (!token) {
     toast.warning("用户未登录");
@@ -279,11 +274,14 @@ const load = () => {
       selected.value = result.map((ts) => ({ date: formatDate(ts) }));
     } else {
       toast.warning(res.message);
+      if (res.status === 10011) {
+        userStore.clearUserInfo();
+        uni.navigateTo({ url: "/pages/login/login" });
+      }
     }
   });
 
   const timestamp = new Date(`${year}-${month}-${day} 00:00:00`).getTime();
-  console.log("-----date:", timestamp);
   params = {
     access_token: token,
     scheduleTime: timestamp,
@@ -296,7 +294,6 @@ const load = () => {
         schedules.value = result.map((rs) => rs);
         schedules.value.forEach((item) => console.log(item));
         scheduleInfo.value = result;
-        console.log("------scheduleInfo:", scheduleInfo);
       } else {
         // toast.warning(res.message);
       }

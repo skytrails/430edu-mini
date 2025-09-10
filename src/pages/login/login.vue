@@ -12,7 +12,7 @@
 </route>
 
 <template>
-  <PageLayout :navbarShow="true">
+  <PageLayout :navbarShow="true" :navLeftArrow="false" navLeftText="">
     <view class="page-container">
       <view class="text-center">
         <view class="logo-bg">
@@ -37,7 +37,6 @@
                 v-model.trim="password"
                 clearable
                 show-password
-                @change="handleChange"
               />
             </view>
           </view>
@@ -121,7 +120,7 @@ import {
   HOME_PAGE,
 } from "@/common/constants";
 
-import { cache, getFileAccessHttpUrl } from "@/common/uitls";
+import { cache, getFileAccessHttpUrl, uuid } from "@/common/uitls";
 import { useRouter } from "@/plugin/uni-mini-router";
 import { useParamsStore } from "@/store/page-params";
 
@@ -151,16 +150,21 @@ const compLogo = ref(defLogo);
 const compTitle = ref("智趣猴");
 const agree = ref(false);
 const paramsStore = useParamsStore();
+const toast = useToast();
+const userStore = useUserStore();
 paramsStore.reset();
 // 是否开启本地路由配置
 let isLocalConfig = getApp().globalData.isLocalConfig;
 if (import.meta.env.MODE === "development") {
-  userName.value = "15768920110";
+  const { userInfo, clearUserInfo } = userStore;
+  // userName.value = "15768920110";
+  userName.value = userInfo.phone;
   password.value = "Yh12345.";
 }
 
 if (import.meta.env.MODE === "production") {
-  // userName.value = "15119337951";
+  const { userInfo, clearUserInfo } = userStore;
+  userName.value = userInfo.phone;
   // password.value = "X3a5Z8LmDP";
   // userName.value = "15768920110";
   // password.value = "Yh12345.";
@@ -169,13 +173,8 @@ if (import.meta.env.MODE === "production") {
 const isSendSMSEnable = computed(() => {
   return smsCountDown.value <= 0 && phoneNo.value.length < 4;
 });
-const toast = useToast();
-const userStore = useUserStore();
 const toggleLoginWay = (val) => {
   loginWay.value = val;
-};
-const handleChangePassword = () => {
-  showPassword.value = !showPassword.value;
 };
 const handleSMSSend = () => {
   let smsParams = { mobile: "", smsmode: "0" };
@@ -225,10 +224,9 @@ const getSendBtnText = computed(() => {
   }
 });
 const hanldeLogin = () => {
-  loginWay.value === 1 ? accountLogin() : phoneLogin();
+  accountLogin();
 };
 const accountLogin = () => {
-  console.log("----agree:", agree.value);
   if (!agree.value) {
     toast.warning("请认真阅读并同意服务协议和隐私协议");
     return;
@@ -242,6 +240,7 @@ const accountLogin = () => {
     return;
   }
   loading.value = true;
+  console.log("", userStore.get);
   http
     .post("/v1/token", {
       client_id: userName.value,
@@ -250,7 +249,7 @@ const accountLogin = () => {
       grant_type: "password",
       device_platform: "IOS",
       product_version: "1.1.3",
-      device_id: "db69c8ca-740a-4424-8e3d-32324a515c25",
+      device_id: "",
       scope: "user",
       captcha: "",
       system_model: "Apple",
@@ -258,20 +257,15 @@ const accountLogin = () => {
     .then((res: any) => {
       if (res.status === 0) {
         const { result } = res;
-        // const userInfo = result.result;
         userStore.setUserInfo({
           ...result,
           token: result.access_token,
           userid: result.client_id,
+          phone: userName.value,
           expireTime: result.expire_time,
-          //username: userInfo.username,
-          // realname: userInfo.realname,
-          // avatar: userInfo.avatar,
-          // tenantId: userInfo.loginTenantId,
           localStorageTime: +new Date(),
         });
         appConfig();
-        departConfig();
         router.pushTab({ path: HOME_PAGE });
       } else {
         toast.warning(res.message);
@@ -282,68 +276,6 @@ const accountLogin = () => {
     });
 };
 
-const phoneLogin = () => {
-  let checkPhone = new RegExp(/^[1]([3-9])[0-9]{9}$/);
-
-  if (!phoneNo.value || phoneNo.value.length == 0) {
-    toast.warning("请输入手机号");
-    return;
-  }
-  if (!checkPhone.test(phoneNo.value)) {
-    toast.warning("请输入正确的手机号");
-    return false;
-  }
-  if (!smsCode.value || smsCode.value.length == 0) {
-    toast.warning("请输入短信验证码");
-    return;
-  }
-  let loginParams = {
-    mobile: phoneNo.value,
-    captcha: smsCode.value,
-  };
-  http
-    .post("/sys/phoneLogin", { mobile: phoneNo.value, captcha: smsCode.value })
-    .then((res: any) => {
-      if (res.success) {
-        const { result } = res;
-        const userInfo = result.userInfo;
-        userStore.setUserInfo({
-          token: result.token,
-          userid: userInfo.id,
-          username: userInfo.username,
-          realname: userInfo.realname,
-          avatar: userInfo.avatar,
-          tenantId: userInfo.loginTenantId,
-          localStorageTime: +new Date(),
-        });
-        //获取app配置
-        appConfig();
-        departConfig();
-      } else {
-        toast.warning(res.message);
-      }
-    })
-    .catch((err) => {
-      let msg = err.message || "请求出现错误，请稍后再试";
-      toast.warning(msg);
-    });
-};
-//部門配置
-const departConfig = () => {
-  /*const appQueryUser = () => {
-    http
-      .get("/sys/user/appQueryUser", {
-        username: userStore.userInfo.username,
-      })
-      .then((res: any) => {
-        if (res.success && res.result.length) {
-          let result = res.result[0];
-          userStore.editUserInfo({ orgCodeTxt: result.orgCodeTxt });
-        }
-      });
-  };
-  appQueryUser();*/
-};
 const appConfig = () => {
   if (isLocalConfig) {
     toast.success("登录成功!");
@@ -425,7 +357,7 @@ if (isLocalConfig === false) {
     font-size: 58upx;
   }
   .enter-area {
-    padding-top: 75px;
+    padding-top: 30px;
     width: 87%;
     margin: 0 auto 60upx;
     .box {
@@ -433,11 +365,10 @@ if (isLocalConfig === false) {
       align-items: center;
       min-height: 100upx;
       color: #000;
-      border: 1px solid #eee;
+      border-bottom: 1px solid #eee;
       background-color: #fff;
       padding: 0 20upx;
-      margin-bottom: 30upx;
-      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+      margin-bottom: 4upx;
       :deep(.wd-text) {
         margin: 0 10upx;
       }
@@ -451,7 +382,7 @@ if (isLocalConfig === false) {
       .uni-input {
         text-align: left;
         font-size: var(--wot-input-fs, var(--wot-cell-title-fs, 14px));
-        height: var(--wot-input-inner-height, 34px);
+        height: var(--wot-input-inner-height, 30px);
         color: var(--wot-input-color, #262626);
         .uni-input-placeholder {
           color: var(--wot-input-placeholder-color, #bfbfbf);

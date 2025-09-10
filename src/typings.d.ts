@@ -26,6 +26,7 @@ declare global {
     welcome?: string
     avatar?: string
     tenantId?: string | number
+    deviceId?: string
     loginTenantId?: string | number
     sex?: number
     phone?: string

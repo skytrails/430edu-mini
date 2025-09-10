@@ -84,7 +84,6 @@ const dataSource = [
 ];
 
 const load = () => {
-  console.log("------", userId.value);
   if (!userId.value) {
     return;
   }

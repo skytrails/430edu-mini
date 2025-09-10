@@ -115,19 +115,13 @@
               <view class="list-right">
                 <view @click="handleContact(it)"> 联系人 </view>
                 <view
-                  v-if="
-                    it.roll_book_state === 'COME' ||
-                    it.roll_book_state === 'NONE'
-                  "
+                  v-if="it.roll_book_state !== 'NO_COME'"
                   @click="handleAbsent(it)"
                 >
                   缺勤
                 </view>
                 <view
-                  v-if="
-                    it.roll_book_state === 'NO_COME' ||
-                    it.roll_book_state === 'NONE'
-                  "
+                  v-if="it.roll_book_state !== 'COME'"
                   @click="handleSign(it)"
                 >
                   签到
@@ -302,16 +296,22 @@ function updateStateById(studentId: string, state: string) {
   }
 }
 const handleAbsent = (e) => {
-  console.log("-----absent", e);
-  statistic.value.signed -= 1;
-  statistic.value.absent += 1;
   updateStateById(e.student_id, "NO_COME");
+  statistic.value.signed = students.value.filter(
+    (s) => s.roll_book_state === "COME",
+  ).length;
+  statistic.value.absent = students.value.filter(
+    (s) => s.roll_book_state === "NO_COME",
+  ).length;
 };
 const handleSign = (e) => {
-  console.log("-----sign");
-  statistic.value.signed += 1;
-  statistic.value.absent -= 1;
   updateStateById(e.student_id, "COME");
+  statistic.value.signed = students.value.filter(
+    (s) => s.roll_book_state === "COME",
+  ).length;
+  statistic.value.absent = students.value.filter(
+    (s) => s.roll_book_state === "NO_COME",
+  ).length;
 };
 const handlePopupClose = (e) => {
   show.value = false;
@@ -361,7 +361,6 @@ const handleSubmit = () => {
     course_time: courseInfo.value.scheduleTime,
     students: students.value,
   };
-  console.log("-----body:", body);
   submitting.value = true;
   http
     .post(api.submitUrl + "?access_token=" + token, body)
@@ -464,7 +463,6 @@ onLoad((options) => {
   flex: 1;
   min-height: 0;
 }
-
 
 .tab-content {
   flex: 1;
