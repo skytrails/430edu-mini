@@ -157,8 +157,8 @@ paramsStore.reset();
 let isLocalConfig = getApp().globalData.isLocalConfig;
 if (import.meta.env.MODE === "development") {
   const { userInfo, clearUserInfo } = userStore;
-  // userName.value = "15768920110";
-  userName.value = userInfo.phone;
+   userName.value = "15768920110";
+  //userName.value = userInfo.phone;
   password.value = "Yh12345.";
 }
 

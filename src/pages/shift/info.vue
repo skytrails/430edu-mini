@@ -256,7 +256,7 @@ const load = (options) => {
     courseInfoId: options.courseInfoId,
     lesson: options.lesson,
     access_token: token,
-    classesName: null,
+    classesName: options.classesName,
   };
   loading.value = true;
   http
@@ -357,7 +357,7 @@ const handleSubmit = () => {
     lesson: courseInfo.value.lesson,
     course_begin_time: courseInfo.value.courseBeginTime,
     course_end_time: courseInfo.value.courseEndTime,
-    classes_name: "",
+    classes_name: courseInfo.value.classesName,
     course_time: courseInfo.value.scheduleTime,
     students: students.value,
   };
@@ -366,7 +366,6 @@ const handleSubmit = () => {
     .post(api.submitUrl + "?access_token=" + token, body)
     .then((res: any) => {
       if (res.status === 0) {
-        console.log(res);
         toast.success("提交成功");
         //router.back();
       }
