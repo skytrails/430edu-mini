@@ -118,9 +118,6 @@ const router = useRouter();
 const selected = ref([]);
 const schedules = ref([]);
 const gridData = ref([]);
-const handleDateTimeChange = (value) => {
-  console.log(value);
-};
 us.data.forEach((item: any, index) => {
   if (index < 9) {
     gridData.value.push({ text: item.title, img: item.icon, itemKey: index });
@@ -131,13 +128,6 @@ function formatTime(seconds: number): string {
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
-}
-
-function formatTime1(timestamp: number): string {
-  const date = new Date(timestamp);
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-  return `${hours}:${minutes}`;
 }
 
 function getDate(date, AddDayCount = 0) {
@@ -215,6 +205,7 @@ const onButtonClick = (idx) => {
     lesson: scheduleInfo.value?.[idx]?.lesson,
     scheduleTime: scheduleInfo.value?.[idx]?.schedule_time,
     classroomAddress: scheduleInfo.value?.[idx]?.classroom_address,
+    classesName: scheduleInfo.value?.[idx]?.classes_name,
     courseTotal: scheduleInfo.value?.[idx]?.course_total,
     courseName: scheduleInfo.value?.[idx]?.course_name,
   };
@@ -256,9 +247,16 @@ const load = () => {
   const userStore = useUserStore();
   const token = userStore.userInfo.token;
   const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth() + 1;
+  // let year = now.getFullYear();
+  // let month = now.getMonth() + 1;
   const day = now.getDate();
+
+  let year = calendarRef.value?.calendar?.year;
+  let month = calendarRef.value?.calendar?.month;
+  if (year === undefined || month === undefined) {
+    year = now.getFullYear();
+    month = now.getMonth() + 1;
+  }
 
   if (!token) {
     toast.warning("用户未登录");
@@ -302,7 +300,12 @@ const load = () => {
       // loading.value = false;
     });
 };
+
 onReady(() => {
+  load();
+});
+
+onShow(() => {
   load();
 });
 </script>
