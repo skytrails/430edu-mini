@@ -111,14 +111,65 @@
                   type="danger"
                   >缺勤</wd-tag
                 >
+                <wd-tag
+                  v-if="it.roll_book_state === 'PUBLIC'"
+                  custom-class="space"
+                  type="danger"
+                  >公假</wd-tag
+                >
+                <wd-tag
+                  v-if="it.roll_book_state === 'PERSONAL'"
+                  custom-class="space"
+                  type="primary"
+                  >私假</wd-tag
+                >
+                <wd-tag
+                  v-if="it.roll_book_state === 'SICK'"
+                  custom-class="space"
+                  type="warning"
+                  >病假</wd-tag
+                >
               </view>
               <view class="list-right">
                 <view @click="handleContact(it)"> 联系人 </view>
-                <view
+                <!--view
                   v-if="it.roll_book_state !== 'NO_COME'"
                   @click="handleAbsent(it)"
                 >
                   缺勤
+                </view-->
+                <view
+                  v-if="it.roll_book_state !== 'COME'"
+                  @click="closeOutside"
+                  style="color: #000"
+                >
+                  <wd-drop-menu style="color: #ee782b" key="index">
+                    <!--wd-drop-menu-item
+                      v-model="it.roll_book_state"
+                      default="NONE"
+                      :options="option1"
+                      @change="handleChange1"
+                    /-->
+                    <wd-drop-menu-item
+                      title="缺勤"
+                      v-model="it.roll_book_state"
+                      ref="dropMenu"
+                    >
+                      <view>
+                        <wd-cell
+                          v-for="(item, idx) in option1"
+                          :key="idx"
+                          :title="item.label"
+                          :class="{ active: it.roll_book_state === item.value }"
+                          clickable
+                          @click="selectOption(it, item.value, index)"
+                        />
+                        <!--wd-cell title="公假" value="PUBLIC" />
+                        <wd-cell title="私假" value="PERSONAL" />
+                        <wd-cell title="病假" value="SICK"/-->
+                      </view>
+                    </wd-drop-menu-item>
+                  </wd-drop-menu>
                 </view>
                 <view
                   v-if="it.roll_book_state !== 'COME'"
@@ -183,7 +234,7 @@
 import { ref, reactive, watch, onBeforeUnmount } from "vue";
 import { cache, getFileAccessHttpUrl, hasRoute } from "@/common/uitls";
 import { onLaunch, onShow, onHide, onLoad, onReady } from "@dcloudio/uni-app";
-import { useToast, useMessage, useNotify } from "wot-design-uni";
+import { useToast, useMessage, useNotify, useQueue } from "wot-design-uni";
 import { useRouter } from "@/plugin/uni-mini-router";
 import {
   ACCESS_TOKEN,
@@ -197,6 +248,15 @@ import { http } from "@/utils/http";
 import { useUserStore } from "@/store/user";
 import useUpload from "@/hooks/useUpload";
 import { getEnvBaseUrl } from "@/utils/index";
+const { closeOutside } = useQueue();
+const dropMenu = ref();
+
+const value1 = ref<number>(0);
+const option1 = ref<Record<string, any>[]>([
+  { label: "公假", value: "PUBLIC" },
+  { label: "私假", value: "PERSONAL" },
+  { label: "病假", value: "SICK" },
+]);
 
 //
 const userStore = useUserStore();
@@ -265,6 +325,7 @@ const load = (options) => {
       if (res.status === 0) {
         students.value = res.result;
         studentList.value = res.result;
+        console.log("---------:", studentList);
 
         statistic.value.signed = students.value.filter(
           (s) => s.roll_book_state === "COME",
@@ -316,6 +377,23 @@ const handleSign = (e) => {
 const handlePopupClose = (e) => {
   show.value = false;
 };
+const selectOption = (it: any, value: string, index: number) => {
+  it.roll_book_state = value;
+  console.log("-----:", it);
+  dropMenu.value[index].close();
+
+  console.log('----students:', students)
+  updateStateById(it.student_id, value);
+  statistic.value.signed = students.value.filter(
+    (s) => s.roll_book_state === "COME",
+  ).length;
+  statistic.value.absent = students.value.filter(
+    (s) => ["PUBLIC", "PERSONAL", "SICK", "NO_COME"].includes(s.roll_book_state),
+  ).length;
+};
+const handleChange1 = (e) => {
+  console.log(e);
+};
 const editAvatar = (avatar) => {
   http
     .put("/sys/user/appEdit", { id: userId.value, avatar })
@@ -351,6 +429,7 @@ const handleSubmit = () => {
   students.value.forEach((s) => {
     s.come = s.roll_book_state === "COME";
   });
+  console.log("----students:", students);
   const body = {
     course_info_id: courseInfo.value.courseInfoId,
     teacher_user_id: userId,
@@ -579,5 +658,12 @@ onLoad((options) => {
 .loading-text {
   font-weight: 700;
   color: #fff;
+}
+:deep(.wd-drop-menu-item__option.is-active) {
+  color: #ff4d4f !important;
+}
+.wd-cell.active {
+  color: #ee782b; /* 选中颜色 */
+  font-weight: bold;
 }
 </style>
